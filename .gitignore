@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 # python venv for deck generation
 scripts/.venv/
+
+.venv/

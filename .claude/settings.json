@@ -44,7 +44,9 @@
       "Bash(curl -s http://localhost:4322/modules/02-public-repos/)",
       "WebFetch(domain:elixir-uk.github.io)",
       "Bash(perl -0pi -e 's/fill=\"111110\"/fill=\"023452\"/; s/color=\"07A46F\"\\\\/><\\\\/w:pBdr><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"EAF7F1\"/color=\"037EAB\"\\\\/><\\\\/w:pBdr><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"E6F2F7\"/; s/color=\"5B6B66\"\\\\/><\\\\/w:pBdr><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"F2F4F3\"/color=\"4A6577\"\\\\/><\\\\/w:pBdr><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"EEF1F3\"/; s/color=\"D9115A\"\\\\/><\\\\/w:pBdr><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"FCE7EE\"/color=\"F47D20\"\\\\/><\\\\/w:pBdr><w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"FDF0E4\"/' scripts/make-reference-templates.mjs)",
-      "Bash(perl -pi -e 's/var\\\\\\(--ink\\\\\\)/var\\(--text\\)/g; s/var\\\\\\(--green\\\\\\)/var\\(--coral\\)/g; s/var\\\\\\(--magenta\\\\\\)/var\\(--p1\\)/g; s/var\\\\\\(--display\\\\\\)/var\\(--font-display\\)/g; s/var\\\\\\(--body\\\\\\)/var\\(--font-body\\)/g; s/var\\\\\\(--mono\\\\\\)/var\\(--font-mono\\)/g;' src/pages/present/02-public-repos.astro)"
+      "Bash(perl -pi -e 's/var\\\\\\(--ink\\\\\\)/var\\(--text\\)/g; s/var\\\\\\(--green\\\\\\)/var\\(--coral\\)/g; s/var\\\\\\(--magenta\\\\\\)/var\\(--p1\\)/g; s/var\\\\\\(--display\\\\\\)/var\\(--font-display\\)/g; s/var\\\\\\(--body\\\\\\)/var\\(--font-body\\)/g; s/var\\\\\\(--mono\\\\\\)/var\\(--font-mono\\)/g;' src/pages/present/02-public-repos.astro)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(awk '{print $5, $9}')"
     ]
   }
 }

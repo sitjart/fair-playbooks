@@ -44,14 +44,17 @@ jobs:
         run: npm ci
 
       # Generate editable .pptx (slides) + .docx (facilitator guide) from each
-      # module's `session:` source. pandoc renders them; librsvg rasterises SVGs.
-      # Drop scripts/reference.pptx / reference.docx to brand the output.
+      # module's `session:` source. pandoc renders the docx; python-pptx the
+      # slides; librsvg rasterises SVGs. A venv avoids PEP 668 on the runner.
       - name: Generate editable decks
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq pandoc librsvg2-bin python3-pip
-          pip3 install --quiet python-pptx pyyaml
-          node scripts/session-to-decks.mjs       # .docx facilitator guide (pandoc)
-          python3 scripts/session_to_pptx.py      # banded .pptx (python-pptx)
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pandoc librsvg2-bin python3-venv
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet python-pptx pyyaml
+          node scripts/make-reference-templates.mjs       # branded reference.docx/.pptx
+          node scripts/session-to-decks.mjs               # .docx facilitator guide (Pandoc)
+          .venv/bin/python scripts/session_to_pptx.py     # banded .pptx (python-pptx)
 
       - name: Build Astro site
         run: npm run build
