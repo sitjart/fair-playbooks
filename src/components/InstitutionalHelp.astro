@@ -1,0 +1,54 @@
+---
+import yaml from 'js-yaml';
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface Props {
+  category: 'dmp' | 'repository' | 'ethics' | 'licensing' | 'it' | 'training';
+}
+const { category } = Astro.props;
+
+const rpo = yaml.load(
+  fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8')
+) as { isCustomised: boolean; institutionalHelp: Record<string, { label: string; contact: string; url: string }> };
+
+const help = rpo.institutionalHelp?.[category];
+---
+{help && (
+  <aside class="inst-help" data-help-category={category}>
+    <div class="inst-help-header">
+      <span class="inst-help-icon">🏛</span>
+      <strong>Local help — {help.label}</strong>
+      <span class="inst-help-flag" data-flag>placeholder</span>
+    </div>
+    <p>
+      <span class="inst-help-contact">{help.contact}</span><span class="inst-help-url">{help.url && <> · <a href={help.url}>{help.url}</a></>}</span>
+    </p>
+  </aside>
+)}
+
+<style>
+  .inst-help {
+    border-left: 4px solid var(--coral);
+    background: var(--bg-alt);
+    padding: 1rem 1.2rem;
+    margin: 0.8rem 0;
+    font-size: 0.95rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .inst-help-header { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+  .inst-help-icon { font-size: 1.2rem; }
+  .inst-help-header strong { font-family: var(--font-display); }
+  .inst-help-flag {
+    background: var(--coral);
+    color: white;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    padding: 0.15rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .inst-help p { margin: 0.4rem 0 0; color: var(--text); }
+</style>

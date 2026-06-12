@@ -1,0 +1,146 @@
+---
+// Web-native present mode for Module 02 — SINGLE SOURCE.
+// Slides generated from the module's `session:` data. Theme mirrors the
+// colleague's deck: dark header band + time chip, panels, BioFAIR colours.
+// Script → reveal speaker notes (S); repo/team lines fill from the profile.
+import { getEntry } from 'astro:content';
+const mod = await getEntry('modules', '02-public-repos');
+if (!mod) throw new Error('Module 02-public-repos not found');
+const { title, summary, session } = mod.data;
+const steps = session.length;
+const totalMinutes = session.at(-1)?.minutes?.split('–').at(-1);
+const dur = (m) => { const n = (m ?? '').match(/\d+/g); return n && n.length >= 2 ? `${+n[1] - +n[0]} min` : (m ? `${m} min` : ''); };
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 02 — FAIRification of RNA-seq · present mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <style>
+    :root {
+      --ink:#023452; --green:#f47d20; --magenta:#037eab;
+      --bg:#ffffff; --bg-alt:#f1f4f6; --muted:#4a6577; --border:#0234521f;
+      --display:'Lato',system-ui,sans-serif; --body:'Lato','Open Sans',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+    }
+    .reveal { font-family: var(--body); background: var(--bg); color: var(--ink); font-size: 30px; }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: var(--display); letter-spacing:-0.02em; line-height:1.05; color: var(--ink); text-transform:none; }
+    .reveal .slides section { text-align: left; }
+    /* band + body read as one card */
+    .slide-card { border-radius: 14px; overflow: hidden; box-shadow: 0 16px 40px -22px rgba(0,0,0,0.45); border: 1px solid var(--border); }
+    .reveal code { font-family: var(--mono); background: var(--bg-alt); padding:0.04em 0.32em; border-radius:5px; font-size:0.88em; }
+    .reveal em { color: var(--magenta); font-style: italic; }
+
+    /* ── Header band + time chip ── */
+    .band { background: var(--ink); color:#fff; padding: 0.55em 0.75em; display:flex; align-items:center; justify-content:space-between; gap:0.7em; border-bottom: 4px solid var(--green); }
+    .band-title { font-family: var(--display); font-weight:700; font-size:1.05em; line-height:1.05; color:#fff; }
+    .band-title b { color: var(--green); font-weight:700; }
+    .chip { background: var(--green); color:#fff; font-family: var(--mono); font-size:0.4em; font-weight:600; padding:0.4em 0.9em; border-radius:999px; white-space:nowrap; letter-spacing:0.04em; }
+
+    .card-body { padding: 0.95em 1.15em; background:#fff; }
+    .card-body.two { display:grid; grid-template-columns:1.3fr 1fr; gap:1em; align-items:center; }
+
+    /* principle pills */
+    .pills { display:flex; gap:0.4em; flex-wrap:wrap; margin-bottom:0.6em; }
+    .pill { background:var(--bg-alt); color:var(--ink); border:1.5px solid var(--ink); font-family:var(--display); font-weight:700; font-size:0.48em; padding:0.2em 0.7em; border-radius:999px; }
+
+    .slide-points { margin:0; padding-left:1.1em; }
+    .slide-points li { font-size:0.62em; line-height:1.5; margin:0.42em 0; }
+    .panel-img { width:100%; border-radius:12px; border:1px solid var(--border); display:block; }
+
+    .repo-slot { background:#fdf0e4; color:#a65610; border:1.5px solid var(--green); padding:0.04em 0.4em; border-radius:6px; font-weight:700; }
+
+    .exercise { margin-top:0.7em; border-left:5px solid var(--magenta); background:#e6f2f7; border-radius:0 10px 10px 0; padding:0.5em 0.8em; font-size:0.54em; }
+    .exercise b { color: var(--magenta); }
+
+    /* ── Title slide ── */
+    .title-inner { padding: 0.4em 0.6em; }
+    .title-logo { height:1.2em; background:#fff; padding:0.25em 0.4em; border-radius:10px; margin-bottom:0.5em; }
+    .eyebrow { font-family:var(--mono); font-size:0.4em; text-transform:uppercase; letter-spacing:0.16em; color:var(--green); font-weight:600; }
+    .title-inner h1 { color:#fff; font-size:1.7em; margin:0.2em 0; }
+    .rule { height:6px; width:3.2em; border-radius:99px; background:linear-gradient(90deg, var(--green), var(--magenta)); margin:0.4em 0; }
+    .title-sub { color:#c7cecb; font-size:0.6em; max-width:24em; }
+
+    /* footer + chrome */
+    .brandmark { position:fixed; left:14px; bottom:10px; z-index:30; font:600 11px/1 var(--mono); color:var(--muted); letter-spacing:0.04em; }
+    .reveal .progress { color: var(--green); height:5px; }
+    .reveal .controls { color: var(--green); }
+    .reveal .slide-number { background: var(--ink); font-family: var(--mono); }
+
+    .demo-banner { position:fixed; top:0; left:0; right:0; z-index:40; background:var(--ink); color:#fff; font:12px/1.5 var(--mono); padding:0.35rem 1rem; text-align:center; }
+    .demo-banner b { color:var(--green); }
+    .demo-banner a { color:var(--green); }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    Module 02 · live present mode · <b>generated from <code style="color:#fff">session:</code></b> · <b>S</b> script+timer ·
+    <a href="?print-pdf">⬇ PDF</a> · fills from your <a href="/branding/">profile</a> · <a href="/modules/02-public-repos/">← back</a>
+  </div>
+  <div class="brandmark">BioFAIR · Module 02 · FAIRification of RNA-seq</div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Title -->
+      <section class="title" data-background-color="#111110">
+        <div class="title-inner">
+          <img class="title-logo" src="/assets/branding/BioFAIR-logo.png" alt="BioFAIR" />
+          <div class="eyebrow">workshop · module 02 · {steps} steps{totalMinutes && ` · ~${totalMinutes} min`}</div>
+          <h1 set:html={title}></h1>
+          <div class="rule"></div>
+          <p class="title-sub">{summary}</p>
+        </div>
+      </section>
+
+      <!-- One slide per session step -->
+      {session.map((step) => (
+        <section data-background-color="#fbfbfa">
+          <div class="slide-card">
+            <div class="band">
+              <div class="band-title">{step.title}</div>
+              {step.minutes && <div class="chip">{dur(step.minutes)}</div>}
+            </div>
+            <div class={step.image ? 'card-body two' : 'card-body'}>
+              <div>
+                {step.points.length > 0 && (
+                  <ul class="slide-points">{step.points.map((pt) => <li set:html={pt}></li>)}</ul>
+                )}
+              </div>
+              {step.image && <img class="panel-img" src={step.image.src} alt={step.image.alt} />}
+            </div>
+          </div>
+          {step.exercise && <div class="exercise"><b>✏ Exercise:</b> {step.exercise}</div>}
+          {step.script && <aside class="notes">{step.script}</aside>}
+        </section>
+      ))}
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    window.Reveal.initialize({ hash: true, center: true, slideNumber: 'c/t', transition: 'slide', plugins: [ window.RevealNotes ] });
+    if (/print-pdf/gi.test(window.location.search)) {
+      window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 900); });
+    }
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('fair:profile') || 'null');
+        if (!p) return;
+        var repo = p.help && p.help.repository && p.help.repository.contact;
+        document.querySelectorAll('[data-profile-repo]').forEach(function (s) {
+          if (repo) s.textContent = repo; else if (p.name) s.textContent = 'ask ' + (p.contactTeam || p.name);
+        });
+        document.querySelectorAll('[data-profile-team]').forEach(function (s) {
+          s.textContent = (p.contactTeam || p.name) + (p.contactEmail ? ' · ' + p.contactEmail : '');
+        });
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

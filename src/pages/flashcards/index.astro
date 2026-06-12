@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Flashcard from '../../components/Flashcard.astro';
+
+const cards = (await getCollection('flashcards')).sort((a, b) => a.data.difficulty - b.data.difficulty);
+const rendered = await Promise.all(cards.map(async (c) => ({ card: c, ...(await render(c)) })));
+---
+<BaseLayout title="Flashcards" description="Pre-workshop and self-paced flashcards for FAIR concepts">
+  <h1>FAIR flashcards</h1>
+  <p class="muted">
+    Pre-workshop primers, or self-paced revision. Click reveal, then mark whether you knew it.
+    Your responses save locally in your browser — no account needed.
+  </p>
+  <p class="muted">Add new cards by dropping a Markdown file into <code>src/content/flashcards/</code>.</p>
+
+  {rendered.map(({ card, Content }) => (
+    <Flashcard
+      question={card.data.question}
+      answer=""
+      category={card.data.category}
+      difficulty={card.data.difficulty}
+    >
+      <Content />
+    </Flashcard>
+  ))}
+</BaseLayout>

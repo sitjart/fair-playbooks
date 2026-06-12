@@ -1,0 +1,483 @@
+---
+import yaml from 'js-yaml';
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const rpoYaml = fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8');
+const rpo = yaml.load(rpoYaml) as {
+  name: string;
+  shortName: string;
+  isCustomised: boolean;
+  theme: { accentColor: string };
+};
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} — FAIR-in-action Playbook · {rpo.shortName}</title>
+  {description ? <meta name="description" content={description} /> : null}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style is:global define:vars={{ accent: rpo.theme.accentColor }}>
+    /* ─── Design tokens ───────────────────────────────────────────────── */
+    :root {
+      /* RPO override stays */
+      --accent: var(--accent);
+
+      /* Palette — ELIXIR-UK brand (navy structure · orange accent · blues) */
+      --bg: #ffffff;
+      --bg-alt: #f1f4f6;      /* wash */
+      --text: #023452;        /* ELIXIR navy — text, headings, structure */
+      --muted: #4a6577;       /* slate — secondary text */
+      --border: #0234521f;
+      --border-strong: #0234523d;
+      --card: #ffffff;
+
+      /* ELIXIR-UK accents */
+      --coral: #f47d20;       /* ELIXIR orange — accent / pop / action */
+      --lime: #9bcbdd;        /* ELIXIR light blue — soft highlight */
+      --p1: #037eab;          /* Playbook 1 = FAIRification (ELIXIR mid blue) */
+      --p2: #f47d20;          /* Playbook 2 = Communicate / Advocate (ELIXIR orange) */
+
+      /* Type */
+      --font-display: 'Lato', system-ui, sans-serif;
+      --font-body: 'Lato', 'Open Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      /* Spacing rhythm */
+      --radius: 14px;
+      --radius-pill: 999px;
+      --shadow-card: 0 1px 0 rgba(15, 15, 18, 0.04), 0 8px 24px -12px rgba(15, 15, 18, 0.12);
+      --shadow-card-lift: 0 1px 0 rgba(15, 15, 18, 0.04), 0 16px 40px -16px rgba(15, 15, 18, 0.2);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: 16.5px;
+      background: var(--bg);
+      /* subtle dot grid texture */
+      background-image: radial-gradient(circle at 1px 1px, rgba(15, 15, 18, 0.04) 1px, transparent 0);
+      background-size: 22px 22px;
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ─── Typography ──────────────────────────────────────────────────── */
+    h1, h2, h3, h4 {
+      font-family: var(--font-display);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--text);
+    }
+    h1 { font-size: clamp(2.2rem, 4.5vw, 3.4rem); font-weight: 700; margin: 0 0 0.6rem; }
+    h2 { font-size: clamp(1.5rem, 2.8vw, 2rem); font-weight: 700; margin: 3rem 0 1rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin: 2rem 0 0.8rem; }
+    p { margin: 0 0 1rem; }
+    a { color: var(--p1); text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; transition: color 0.15s; }
+    a:hover { color: var(--coral); }
+    code, pre { font-family: var(--font-mono); font-size: 0.9em; }
+    code {
+      background: var(--bg-alt);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+    }
+    pre {
+      background: #1a1a1f;
+      color: #f3ede3;
+      padding: 1.2rem 1.4rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; color: inherit; }
+    blockquote {
+      border-left: 3px solid var(--coral);
+      padding: 0.5rem 1.2rem;
+      margin: 1.5rem 0;
+      color: var(--muted);
+      font-style: italic;
+    }
+    table { border-collapse: collapse; width: 100%; margin: 1.5rem 0; }
+    th, td { padding: 0.7rem 0.9rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { font-family: var(--font-display); font-weight: 600; background: var(--bg-alt); }
+
+    /* ─── Layout ──────────────────────────────────────────────────────── */
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* ─── Header ──────────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, var(--text) 0%, #01243a 100%);
+      color: white;
+      padding: 1.5rem 2rem 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      top: -50%; right: -10%;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, var(--coral) 0%, transparent 70%);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    .header-brand { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
+    .header-logo {
+      height: 46px;
+      width: auto;
+      display: block;
+    }
+    .header-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      color: white;
+      text-decoration: none;
+    }
+    .header-title:hover { color: var(--lime); }
+    .header-org {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      margin-top: 0.2rem;
+      font-family: var(--font-mono);
+    }
+    header nav {
+      display: flex;
+      gap: 0;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    header nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.92rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-pill);
+      transition: background 0.15s, color 0.15s;
+    }
+    header nav a:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--lime);
+    }
+
+    /* ─── Source banner (canonical version only) ──────────────────────── */
+    .source-banner {
+      background: var(--lime);
+      color: var(--text);
+      padding: 0.7rem 2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    .source-banner code { background: rgba(15, 15, 18, 0.08); }
+    /* Runtime profile indicator — canonical (lime) vs active institution (dark) */
+    #profile-indicator[data-active="true"] {
+      background: var(--text);
+      color: white;
+    }
+    #profile-indicator a { color: inherit; font-weight: 600; }
+    #profile-indicator[data-active="true"] a { color: var(--lime); }
+    #profile-indicator .indicator-sub {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      opacity: 0.7;
+      margin-left: 0.4rem;
+    }
+    #profile-indicator #profile-clear {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+    }
+    #profile-indicator #profile-clear:hover { border-color: var(--lime); color: var(--lime); }
+    .inst-help-flag[data-filled="true"] {
+      background: var(--p1) !important;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+    }
+
+    /* ─── Cards ───────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.6rem;
+      margin: 1rem 0;
+      box-shadow: var(--shadow-card);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.15s;
+    }
+    a.card { display: block; text-decoration: none; color: inherit; }
+    a.card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card-lift);
+      border-color: var(--border-strong);
+    }
+
+    /* ─── Badges and pills ────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      background: var(--text);
+      color: white;
+      padding: 0.25rem 0.7rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .pb-badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--p1);
+      color: white;
+      margin-right: 0.4rem;
+      box-shadow: 2px 2px 0 var(--text);
+    }
+    .pb-badge[data-pb="communicate-advocate"] { background: var(--p2); }
+
+    /* ─── Buttons ─────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-block;
+      background: var(--text);
+      color: white;
+      padding: 0.7rem 1.4rem;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 3px 3px 0 var(--coral);
+    }
+    .btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 var(--coral);
+      color: white;
+    }
+    .btn-primary { background: var(--coral); }
+    .btn-primary:hover { box-shadow: 4px 4px 0 var(--text); }
+
+    /* ─── Utility ─────────────────────────────────────────────────────── */
+    .muted { color: var(--muted); font-size: 0.92rem; }
+    .stack > * + * { margin-top: 1rem; }
+
+    /* ─── Footer ──────────────────────────────────────────────────────── */
+    footer {
+      max-width: 980px;
+      margin: 4rem auto 2rem;
+      padding: 2rem 1.5rem;
+      border-top: 2px solid var(--text);
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+    .footer-partners {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .footer-built { color: var(--muted); }
+    .footer-logos { display: flex; align-items: center; gap: 1.6rem; }
+    .footer-logo { height: 38px; width: auto; display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="header-brand">
+        <img src="/assets/branding/elixir-uk-logo-negative.svg" alt="ELIXIR-UK" class="header-logo" id="header-logo-img" />
+        <a href="/" class="header-title">FAIR-in-action ⟶ Playbook</a>
+      </div>
+      <div class="header-org">
+        {rpo.isCustomised ? rpo.name : '// canonical source · ELIXIR-UK RDM Club · commissioned by BioFAIR'}
+      </div>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/recommend/">Build a session</a>
+        <a href="/modules/">All modules</a>
+        <a href="/journeys/">Suggested journeys</a>
+        <a href="/flashcards/">Flashcards</a>
+        <a href="/parking-lot/">Parking lot</a>
+      </nav>
+    </div>
+  </header>
+  <div id="profile-indicator" class="source-banner" data-active="false" hidden></div>
+  <main>
+    <slot />
+  </main>
+  <footer>
+    <div class="footer-partners">
+      <span class="footer-built">Built by the ELIXIR-UK RDM Club · commissioned by BioFAIR</span>
+      <div class="footer-logos">
+        <img src="/assets/branding/elixir-uk-logo.svg" alt="ELIXIR-UK" class="footer-logo" />
+        <img src="/assets/branding/BioFAIR-logo.png" alt="BioFAIR" class="footer-logo" />
+      </div>
+    </div>
+    // one canonical kit · <a href="/branding/">set up your institution</a> to fill local details everywhere — no fork, nothing to keep in sync. New activities appear automatically.
+  </footer>
+
+  <!-- ─── Runtime institutional profile ───────────────────────────────────
+       The whole kit is canonical and central. An institution's local details
+       (repositories, contacts, policies) live in a small profile stored in the
+       browser — NOT in a fork. Every institutional slot hydrates from it at
+       runtime, so a new module shipped upstream is instantly usable, already
+       wired to accept the profile. Set up once on /branding/. -->
+  <script is:inline>
+    (function () {
+      var KEY = 'fair:profile';
+      function read() {
+        try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; }
+      }
+      window.FairProfile = {
+        get: read,
+        set: function (p) {
+          localStorage.setItem(KEY, JSON.stringify(p));
+          document.dispatchEvent(new CustomEvent('fair:profile-change', { detail: p }));
+        },
+        clear: function () {
+          localStorage.removeItem(KEY);
+          document.dispatchEvent(new CustomEvent('fair:profile-change', { detail: null }));
+        }
+      };
+    })();
+  </script>
+  <script is:inline>
+    (function () {
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (m) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+        });
+      }
+
+      // ── "Viewing as" indicator bar ──
+      function renderIndicator() {
+        var el = document.getElementById('profile-indicator');
+        if (!el) return;
+        var p = window.FairProfile.get();
+        if (p && p.name) {
+          el.dataset.active = 'true';
+          el.innerHTML =
+            '<span>Viewing as <strong>' + esc(p.name) + '</strong> — local details filled from your institution profile.</span> ' +
+            '<a href="/branding/">edit</a> &middot; <button type="button" id="profile-clear">view canonical</button>';
+          var c = document.getElementById('profile-clear');
+          if (c) c.addEventListener('click', function () { window.FairProfile.clear(); });
+        } else {
+          el.dataset.active = 'false';
+          el.innerHTML =
+            "You're viewing the <strong>canonical ELIXIR-UK kit</strong>. " +
+            '<a href="/branding/">Set up your institution &rarr;</a> ' +
+            '<span class="indicator-sub">fills local details everywhere — no fork</span>';
+        }
+        el.hidden = false;
+      }
+
+      // ── Hydrate institutional-help slots from the profile ──
+      function hydrateHelp() {
+        var p = window.FairProfile.get();
+        document.querySelectorAll('.inst-help').forEach(function (slot) {
+          var cat = slot.getAttribute('data-help-category');
+          var entry = p && p.help && p.help[cat];
+          var flag = slot.querySelector('[data-flag]');
+          var contact = slot.querySelector('.inst-help-contact');
+          var urlWrap = slot.querySelector('.inst-help-url');
+          if (entry && (entry.contact || entry.url)) {
+            if (contact && entry.contact) contact.textContent = entry.contact;
+            if (urlWrap) {
+              urlWrap.innerHTML = entry.url
+                ? ' &middot; <a href="' + esc(entry.url) + '">' + esc(entry.url) + '</a>'
+                : '';
+            }
+            if (flag) {
+              flag.textContent = '✓ ' + (p.shortName || p.name);
+              flag.setAttribute('data-filled', 'true');
+            }
+          } else if (flag) {
+            // reset to placeholder state (e.g. after "view canonical")
+            flag.textContent = 'placeholder';
+            flag.removeAttribute('data-filled');
+          }
+        });
+      }
+
+      // ── Fill inline repository / team slots from the profile ──
+      function hydrateSlots() {
+        var p = window.FairProfile.get();
+        var repo = p && p.help && p.help.repository && p.help.repository.contact;
+        document.querySelectorAll('[data-profile-repo]').forEach(function (s) {
+          if (repo) s.textContent = repo;
+          else if (p && p.name) s.textContent = 'ask ' + (p.contactTeam || p.name);
+          else s.textContent = "[ your institution's preferred repository ]";
+        });
+        document.querySelectorAll('[data-profile-team]').forEach(function (s) {
+          if (p && p.name) s.textContent = (p.contactTeam || p.name) + (p.contactEmail ? ' · ' + p.contactEmail : '');
+          else s.textContent = '[ set up your institution profile ]';
+        });
+      }
+
+      // ── Apply the institution's brand (colours + logo) live, no fork ──
+      function applyBrand() {
+        var p = window.FairProfile.get();
+        var b = (p && p.brand) || {};
+        var root = document.documentElement;
+        if (b.primary) { root.style.setProperty('--coral', b.primary); root.style.setProperty('--p2', b.primary); }
+        else { root.style.removeProperty('--coral'); root.style.removeProperty('--p2'); }
+        if (b.accent) { root.style.setProperty('--lime', b.accent); root.style.setProperty('--p1', b.accent); }
+        else { root.style.removeProperty('--lime'); root.style.removeProperty('--p1'); }
+        var logo = document.getElementById('header-logo-img');
+        if (logo) logo.src = b.logo || '/assets/branding/elixir-uk-logo-negative.svg';
+      }
+
+      function refresh() { renderIndicator(); hydrateHelp(); hydrateSlots(); applyBrand(); }
+      document.addEventListener('fair:profile-change', refresh);
+      if (document.readyState !== 'loading') refresh();
+      else document.addEventListener('DOMContentLoaded', refresh);
+    })();
+  </script>
+</body>
+</html>

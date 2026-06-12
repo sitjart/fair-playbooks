@@ -1,0 +1,130 @@
+---
+interface Props {
+  question: string;
+  answer: string;
+  category: string;
+  difficulty: number;
+}
+const { question, answer, category, difficulty } = Astro.props;
+---
+<div class="flashcard" data-revealed="false">
+  <div class="flashcard-meta">
+    <span class="badge">{category}</span>
+    <span class="difficulty">{'★'.repeat(difficulty)}{'☆'.repeat(3 - difficulty)}</span>
+  </div>
+  <div class="flashcard-question">
+    <strong>Q:</strong> {question}
+  </div>
+  <button class="flashcard-reveal" type="button">Reveal answer</button>
+  <div class="flashcard-answer">
+    <strong>A:</strong>
+    <div class="flashcard-answer-body"><slot /></div>
+  </div>
+  <div class="flashcard-feedback">
+    <button data-feedback="got-it" type="button">I knew this</button>
+    <button data-feedback="didnt-know" type="button">Need to revisit</button>
+  </div>
+</div>
+
+<style>
+  .flashcard {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.6rem 1.8rem;
+    margin: 1.2rem 0;
+    box-shadow: var(--shadow-card);
+    transition: all 0.2s ease;
+  }
+  .flashcard[data-revealed="true"] {
+    border-color: var(--text);
+    box-shadow: 6px 6px 0 var(--coral);
+    transform: translate(-2px, -2px);
+  }
+  .flashcard-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+  }
+  .flashcard-meta .badge {
+    text-transform: lowercase;
+    background: var(--bg-alt);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .difficulty { color: var(--coral); letter-spacing: 0.1em; }
+  .flashcard-question {
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .flashcard-question strong {
+    font-family: var(--font-display);
+    color: var(--coral);
+    margin-right: 0.3rem;
+  }
+  .flashcard-reveal {
+    background: var(--text);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    box-shadow: 3px 3px 0 var(--coral);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .flashcard-reveal:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--coral);
+  }
+  .flashcard-answer, .flashcard-feedback { display: none; margin-top: 1.2rem; }
+  .flashcard[data-revealed="true"] .flashcard-answer,
+  .flashcard[data-revealed="true"] .flashcard-feedback { display: block; }
+  .flashcard[data-revealed="true"] .flashcard-reveal { display: none; }
+  .flashcard-answer strong {
+    font-family: var(--font-display);
+    color: var(--coral);
+    margin-right: 0.3rem;
+  }
+  .flashcard-feedback { display: flex; gap: 0.6rem; }
+  .flashcard-feedback button {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .flashcard-feedback button:hover { border-color: var(--text); }
+  .flashcard-feedback button[data-state="active"] {
+    background: var(--text);
+    color: var(--lime);
+    border-color: var(--text);
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.flashcard').forEach((card) => {
+    const reveal = card.querySelector('.flashcard-reveal');
+    reveal?.addEventListener('click', () => card.setAttribute('data-revealed', 'true'));
+
+    card.querySelectorAll('.flashcard-feedback button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        card.querySelectorAll('.flashcard-feedback button').forEach((b) => b.removeAttribute('data-state'));
+        btn.setAttribute('data-state', 'active');
+        const feedback = btn.getAttribute('data-feedback');
+        const key = `flashcard-${(card.querySelector('.flashcard-question')?.textContent || '').slice(0, 40)}`;
+        try { localStorage.setItem(key, feedback || ''); } catch {}
+      });
+    });
+  });
+</script>

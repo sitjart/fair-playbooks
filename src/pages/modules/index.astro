@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const modules = (await getCollection('modules')).sort((a, b) => a.data.number - b.data.number);
+---
+<BaseLayout title="All modules">
+  <h1>All modules</h1>
+  <p class="muted">Five modules covering the FAIR-in-action playbook. Each has a short and long version.</p>
+  {modules.map((mod) => (
+    <a href={`/modules/${mod.id}/`} class="card" style="display:block; text-decoration:none; color:inherit;">
+      <span class="badge">Module {mod.data.number}</span>
+      <strong style="margin-left:0.6rem;">{mod.data.title}</strong>
+      <div class="muted" style="margin-top:0.3rem;">{mod.data.summary}</div>
+    </a>
+  ))}
+</BaseLayout>

@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Present-mode examples" description="The same Module 02 micro-deck in reveal.js, Marp, and a custom present mode — compare for yourself.">
+  <div class="ex-eyebrow">decide by clicking, not arguing →</div>
+  <h1 class="ex-title">Three ways to make slides + scripts <em>live</em></h1>
+  <p class="ex-sub">
+    The <strong>same three Module 02 slides</strong> (title → FAIR principles → "finding the data") built three ways.
+    Each keeps the facilitator script next to the slide and fills the repository placeholder from your institution profile.
+    Click through and feel the difference.
+  </p>
+
+  <div class="ex-tip card">
+    <strong>Do this first:</strong> open <a href="/branding/">/branding/</a> → <em>Load a demo institution</em>.
+    Then the "preferred repository" line in every example below fills in with <code>Wessex</code> — live, no editing the deck.
+    That's the point: one profile, every artifact.
+  </div>
+
+  <div class="ex-grid">
+    <a class="card ex-card" href="/examples/reveal/">
+      <div class="ex-tag">reveal.js</div>
+      <strong>Richest live delivery</strong>
+      <p>Present from the browser. Press <kbd>S</kbd> for presenter view: current slide, next slide, your script, and a timer on a second screen. Exports PDF. Runs offline.</p>
+      <span class="ex-cta">open example →</span>
+    </a>
+    <a class="card ex-card" href="/examples/marp/">
+      <div class="ex-tag">Marp</div>
+      <strong>One source → web + PowerPoint</strong>
+      <p>Authored as plain markdown. Press <kbd>P</kbd> for presenter notes. The same file exports a real <code>.pptx</code> and <code>.pdf</code> — see the buttons below.</p>
+      <span class="ex-cta">open example →</span>
+    </a>
+    <a class="card ex-card" href="/examples/custom/">
+      <div class="ex-tag">custom (no dependency)</div>
+      <strong>Slides + script, side by side</strong>
+      <p>Built in this site's own stack — nothing new to install or maintain. Slide and facilitator script always visible together. Print-to-PDF export.</p>
+      <span class="ex-cta">open example →</span>
+    </a>
+  </div>
+
+  <div class="ex-exports">
+    <span>Marp's export bridge, generated from the <em>same</em> markdown:</span>
+    <a href="/examples/marp/module02.pptx" download class="btn">↓ module02.pptx</a>
+    <a href="/examples/marp/module02.pdf" download class="btn">↓ module02.pdf</a>
+    <a href="/examples/marp/deck.md" download class="btn">↓ source.md</a>
+  </div>
+
+  <h2>Honest trade-offs</h2>
+  <div class="ex-table-wrap">
+    <table>
+      <thead>
+        <tr><th>What matters</th><th>reveal.js</th><th>Marp</th><th>Custom</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Live present + speaker notes</td><td>★★★ presenter view</td><td>★★ notes view</td><td>★★ side-by-side</td></tr>
+        <tr><td>Exports to PowerPoint (.pptx)</td><td>✗</td><td>★★★ built-in</td><td>✗ (PDF via print)</td></tr>
+        <tr><td>Profile fills slide live</td><td>✓</td><td>✓ web only</td><td>✓</td></tr>
+        <tr><td>Authoring effort</td><td>HTML/markdown</td><td>plain markdown</td><td>structured data in repo</td></tr>
+        <tr><td>New dependency to maintain</td><td>1 library (CDN/vendored)</td><td>1 build tool</td><td>none</td></tr>
+        <tr><td>Non-technical edits</td><td>harder</td><td>markdown (easy)</td><td>harder</td></tr>
+        <tr><td>Works offline in a room</td><td>✓ (vendor it)</td><td>✓ export</td><td>✓ (static)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ex-take card">
+    <strong>My read:</strong> if the priority is the <em>in-room experience</em> (slides + script + timer), <strong>reveal.js</strong> wins.
+    If the priority is <em>"we still need a PowerPoint and a Zenodo PDF from one source"</em>, <strong>Marp</strong> wins outright.
+    The <strong>custom</strong> option is the no-new-dependency fallback. They're not exclusive — you could author in Marp markdown and present with reveal-style notes — but for one decision, it comes down to <em>in-room polish</em> vs <em>export portability</em>.
+  </div>
+
+  <p class="ex-back"><a href="/">← back to the kit</a></p>
+</BaseLayout>
+
+<style>
+  .ex-eyebrow { font-family: var(--font-mono); font-size: 0.85rem; color: var(--coral); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+  .ex-title { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 0.6rem; }
+  .ex-title em { color: var(--coral); font-style: italic; }
+  .ex-sub { font-size: 1.05rem; color: var(--muted); max-width: 44rem; line-height: 1.6; }
+  .ex-tip { border-left: 4px solid var(--lime); background: var(--bg-alt); font-size: 0.95rem; line-height: 1.6; }
+  .ex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+  .ex-card { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .ex-tag { font-family: var(--font-mono); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--coral); font-weight: 600; margin-bottom: 0.4rem; }
+  .ex-card strong { font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 0.5rem; }
+  .ex-card p { color: var(--muted); font-size: 0.9rem; margin: 0 0 1rem; flex: 1; line-height: 1.5; }
+  .ex-card kbd { background: var(--text); color: white; border-radius: 5px; padding: 0.05em 0.4em; font-family: var(--font-mono); font-size: 0.85em; }
+  .ex-cta { font-family: var(--font-mono); font-size: 0.85rem; color: var(--coral); margin-top: auto; }
+  .ex-exports { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; margin: 1rem 0 2rem; font-size: 0.92rem; color: var(--muted); }
+  .ex-table-wrap { overflow-x: auto; }
+  .ex-table-wrap td:first-child { font-weight: 600; }
+  .ex-take { border-left: 4px solid var(--coral); line-height: 1.6; }
+  .ex-back { margin-top: 2rem; color: var(--muted); }
+</style>

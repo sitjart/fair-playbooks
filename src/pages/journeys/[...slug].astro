@@ -1,0 +1,79 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const journeys = await getCollection('journeys');
+  return journeys.map((journey) => ({
+    params: { slug: journey.id },
+    props: { journey },
+  }));
+}
+
+const { journey } = Astro.props;
+const { Content: JourneyIntro } = await render(journey);
+
+const steps = await Promise.all(journey.data.path.map(async (step) => {
+  const mod = await getEntry('modules', step.module);
+  return { step, mod };
+}));
+
+const totalMinutes = steps.reduce((sum, { step, mod }) => {
+  if (!mod) return sum;
+  return sum + (step.version === 'short' ? mod.data.estimatedMinutes.short : mod.data.estimatedMinutes.long);
+}, 0);
+---
+<BaseLayout title={journey.data.title} description={journey.data.scenario}>
+  <h1>{journey.data.title}</h1>
+  <p class="muted">For: {journey.data.audience}</p>
+  <div class="card">
+    <strong>Scenario:</strong> {journey.data.scenario}
+  </div>
+  <article style="margin: 1.5rem 0;">
+    <JourneyIntro />
+  </article>
+
+  <h2>The path ({totalMinutes} min total)</h2>
+  <ol class="journey-path">
+    {steps.map(({ step, mod }, i) => mod && (
+      <li>
+        <a href={`/modules/${mod.id}/#${step.version}`}>
+          <span class="badge">Module {mod.data.number}</span>
+          <strong style="margin-left:0.6rem;">{mod.data.title}</strong>
+        </a>
+        <div class="muted" style="margin-top:0.3rem;">
+          {step.version === 'short' ? 'Quick recap' : 'Full module'} ·
+          {step.version === 'short' ? mod.data.estimatedMinutes.short : mod.data.estimatedMinutes.long} min
+        </div>
+      </li>
+    ))}
+  </ol>
+</BaseLayout>
+
+<style>
+  .journey-path { list-style: none; padding: 0; counter-reset: step; }
+  .journey-path li {
+    counter-increment: step;
+    position: relative;
+    padding: 1rem 1rem 1rem 3.5rem;
+    margin: 0.6rem 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .journey-path li::before {
+    content: counter(step);
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    text-align: center;
+    line-height: 1.8rem;
+    font-weight: 600;
+  }
+  .journey-path a { text-decoration: none; color: inherit; }
+</style>

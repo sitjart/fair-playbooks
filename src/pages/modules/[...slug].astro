@@ -1,0 +1,526 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const modules = await getCollection('modules');
+  return modules.map((mod) => ({
+    params: { slug: mod.id },
+    props: { mod },
+  }));
+}
+
+const { mod } = Astro.props;
+const { Content } = await render(mod);
+
+// Editable decks generated from `session:` by scripts/session-to-decks.mjs
+// (locally + in the deploy Action). Paths mirror the generator's output dir.
+const assetDir = mod.id.startsWith('p2-') ? mod.id : mod.id.slice(0, 2);
+const pptxUrl = `/assets/modules/${assetDir}/${mod.id}.pptx`;
+const docxUrl = `/assets/modules/${assetDir}/${mod.id}-facilitator-guide.docx`;
+
+// Cumulative range like "40–50" → how long the section takes ("10 min").
+const dur = (m?: string) => {
+  const n = (m ?? '').match(/\d+/g);
+  return n && n.length >= 2 ? `${+n[1] - +n[0]} min` : (m ? `${m} min` : '');
+};
+
+const useCaseLabels: Record<string, string> = {
+  'unpublished': 'Unpublished',
+  'published-not-fair': 'Published but not FAIRly',
+  'legacy': 'Legacy data',
+};
+
+---
+<BaseLayout title={mod.data.title} description={mod.data.summary}>
+  <!-- HERO with oversized module number -->
+  <header class="mod-hero">
+    <div class="mod-hero-number">
+      {mod.data.isSideRoom ? '↗' : String(mod.data.number).padStart(2, '0')}
+    </div>
+    <div class="mod-hero-content">
+      <div class="mod-hero-badges">
+        {mod.data.playbook.map((pb) => (
+          <span class="pb-badge" data-pb={pb}>
+            {pb === 'fairification' ? 'Playbook 1 · FAIRification' : 'Playbook 2 · Communicate / Advocate'}
+          </span>
+        ))}
+        {mod.data.isSideRoom && <span class="badge">side room</span>}
+      </div>
+      <h1 class="mod-hero-title">{mod.data.title}</h1>
+      <p class="mod-hero-summary">{mod.data.summary}</p>
+
+      {mod.data.useCases.length > 0 && (
+        <div class="use-cases">
+          <span class="use-cases-label">covers:</span>
+          {mod.data.useCases.map((uc) => <span class="use-case-tag">{useCaseLabels[uc]}</span>)}
+        </div>
+      )}
+    </div>
+  </header>
+
+  {mod.data.drawnFromExistingResources && (
+    <div class="card" style="border-left: 4px solid var(--coral);">
+      <strong>Drawn from existing resources.</strong> This module isn't being written
+      fresh by the FAIR-in-action Bridge project — it pulls from established sources
+      (RDMkit, GO FAIR, the original FAIR principles paper). Follow the links in the long version.
+    </div>
+  )}
+
+  {mod.data.sources.length > 0 && (
+    <section class="sources-strip">
+      <span class="sources-eyebrow">▢ built from — translated, not reinvented</span>
+      <ul class="sources-list">
+        {mod.data.sources.map((s) => (
+          <li>
+            <a href={s.url} target="_blank" rel="noopener">{s.name} ↗</a>
+            {s.note && <span class="sources-note">— {s.note}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {mod.data.session.length > 0 && (
+    <section class="workshop-pack">
+      <div class="workshop-pack-header">
+        <div>
+          <div class="workshop-pack-eyebrow">⬇ workshop pack · always current</div>
+          <h2 class="workshop-pack-title">Get the materials</h2>
+          <p class="workshop-pack-note muted">
+            Every format is generated from the session below — so it's never out of date.
+            <a href="/branding/" style="color: var(--lime);">Branded for your institution →</a>
+          </p>
+        </div>
+      </div>
+      <div class="pack-downloads">
+        {mod.id === '02-public-repos' && (
+          <a class="pack-dl pack-dl-primary" href="/present/02-public-repos/">▶ Present live<span class="pack-dl-ext">in the browser · fills with your institution</span></a>
+        )}
+        <button type="button" class="pack-dl" onclick="window.print()">⬇ PDF handout<span class="pack-dl-ext">print / save as PDF</span></button>
+        <a class="pack-dl" href={pptxUrl} download>⬇ Editable slides<span class="pack-dl-ext">.pptx · PowerPoint / Google Slides</span></a>
+        <a class="pack-dl" href={docxUrl} download>⬇ Facilitator guide<span class="pack-dl-ext">.docx · Word / Google Docs</span></a>
+      </div>
+    </section>
+  )}
+
+  {mod.data.session.length > 0 && (
+    <section class="fac-session" id="run-session">
+      <div class="fac-eyebrow">▶ the session · {mod.data.session.length} steps</div>
+      <h2 class="fac-title">Run this session</h2>
+      {mod.data.session.map((step, i) => (
+        <div class="fac-step">
+          <div class="fac-step-top">
+            <span class="fac-num">{i + 1}</span>
+            <h3 class="fac-step-title">{step.title}</h3>
+            {step.minutes && <span class="fac-time">{dur(step.minutes)}</span>}
+          </div>
+          {step.script && (
+            <div class="fac-script"><span class="fac-script-label">🗣 say</span><p set:html={step.script}></p></div>
+          )}
+          {step.points.length > 0 && (
+            <ul class="fac-points">{step.points.map((pt) => <li set:html={pt}></li>)}</ul>
+          )}
+          {step.image && <img class="fac-img" src={step.image.src} alt={step.image.alt} loading="lazy" />}
+          {step.exercise && <div class="fac-exercise">✏ {step.exercise}</div>}
+        </div>
+      ))}
+    </section>
+  )}
+
+  {mod.data.session.length === 0 && (
+    <article class="prose mod-prose">
+      <Content />
+    </article>
+  )}
+
+  <div class="mod-footer">
+    <a href="/modules/" class="hero-link">← all modules</a>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .mod-hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
+    padding: 1rem 0 2.5rem;
+    border-bottom: 2px solid var(--text);
+    margin-bottom: 2.5rem;
+    /* This is a <header>, which inherits the global dark-gradient header style.
+       The module hero is designed for the light page background, so reset it. */
+    background: none;
+    color: var(--text);
+    overflow: visible;
+  }
+  /* Kill the global header's coral glow (header::after) on the module hero. */
+  .mod-hero::after { content: none; }
+  .mod-hero-number {
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 12vw, 9rem);
+    font-weight: 700;
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    color: var(--text);
+    /* offset shadow effect */
+    text-shadow: 4px 4px 0 var(--coral);
+  }
+  .mod-hero-content { padding-top: 0.5rem; }
+  .mod-hero-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .mod-hero-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    margin: 0 0 0.6rem;
+    line-height: 1.1;
+  }
+  .mod-hero-summary {
+    font-size: 1.05rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .use-cases {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+  }
+  .use-cases-label {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .use-case-tag {
+    padding: 0.2rem 0.7rem;
+    background: var(--text);
+    color: var(--lime);
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+
+  /* Version toggle */
+  .version-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem 0 2rem;
+    padding: 0.4rem;
+    background: var(--bg-alt);
+    border-radius: var(--radius-pill);
+    width: fit-content;
+  }
+  .version-btn {
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .version-btn:hover { color: var(--text); }
+  .version-btn[data-active="true"] {
+    background: var(--text);
+    color: white;
+    font-weight: 600;
+  }
+
+  .version-pane { display: none; }
+  .version-pane[data-active="true"] { display: block; }
+
+  /* ─── Sources / provenance strip ────────────────────────────────────── */
+  .sources-strip {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    padding: 1rem 1.3rem;
+    margin: 0 0 1.5rem;
+    background: var(--bg-alt);
+  }
+  .sources-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .sources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.6rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .sources-list li { margin: 0; font-size: 0.92rem; }
+  .sources-list a { font-family: var(--font-display); font-weight: 600; }
+  .sources-note { color: var(--muted); }
+
+  /* ─── Facilitator-ready session (single source → page / present / PDF) ─ */
+  .fac-session { margin: 2.5rem 0; }
+  .fac-eyebrow { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--coral); font-weight: 600; }
+  .fac-title { margin: 0.2rem 0 0.4rem; }
+  .fac-sub { max-width: 44rem; }
+  .fac-print-btn { background: var(--text); color: #fff; border: none; border-radius: var(--radius-pill); padding: 0.25rem 0.8rem; font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; cursor: pointer; box-shadow: 2px 2px 0 var(--coral); }
+  .fac-print-btn:hover { transform: translate(-1px, -1px); }
+  .fac-step { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 1.2rem 1.4rem; margin: 0.9rem 0; background: var(--card); box-shadow: var(--shadow-card); }
+  .fac-step-top { display: flex; align-items: center; gap: 0.8rem; }
+  .fac-num { background: var(--coral); color: #fff; width: 1.8rem; height: 1.8rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; flex: none; box-shadow: 2px 2px 0 var(--text); }
+  .fac-step-title { margin: 0; font-size: 1.2rem; flex: 1; }
+  .fac-time { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .fac-principles { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+  .fac-pill { background: var(--text); color: var(--lime); font-family: var(--font-display); font-weight: 700; font-size: 0.7rem; padding: 0.15rem 0.6rem; border-radius: var(--radius-pill); }
+  .fac-script { margin: 0.7rem 0 0; background: var(--bg-alt); border-left: 3px solid var(--coral); border-radius: 0 8px 8px 0; padding: 0.6rem 0.9rem; }
+  .fac-script-label { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--coral); font-weight: 600; }
+  .fac-script p { margin: 0.2rem 0 0; }
+  .fac-points { margin: 0.6rem 0 0; padding-left: 1.2rem; }
+  .fac-points li { margin: 0.25rem 0; }
+  .fac-points :global(.repo-slot), .fac-script :global(.repo-slot) { background: var(--lime); padding: 0.05em 0.4em; border-radius: 6px; font-weight: 600; }
+  .fac-exercise { margin-top: 0.7rem; background: #fff7e6; border: 1.5px solid #e9a23b; border-radius: 10px; padding: 0.5rem 0.8rem; font-size: 0.9rem; }
+  .fac-img { display: block; max-width: 100%; height: auto; margin: 0.8rem 0 0; border: 1px solid var(--border); border-radius: 10px; }
+
+  .fac-downloads { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0 0 1.5rem; }
+  .fac-dl {
+    display: inline-flex; flex-direction: column; gap: 0.1rem;
+    background: var(--card); border: 1.5px solid var(--text); border-radius: var(--radius);
+    padding: 0.55rem 0.9rem; font-family: var(--font-display); font-weight: 600; font-size: 0.92rem;
+    color: var(--text); text-decoration: none; cursor: pointer; box-shadow: 2px 2px 0 var(--coral);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .fac-dl:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--coral); color: var(--text); }
+  .fac-dl-ext { font-family: var(--font-mono); font-weight: 400; font-size: 0.68rem; color: var(--muted); }
+
+  /* PDF download = print exactly these steps as a clean handout */
+  /* Download buttons inside the dark workshop-pack box */
+  .pack-downloads { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  .pack-dl {
+    display: flex; flex-direction: column; gap: 0.15rem;
+    background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius); padding: 0.7rem 1rem; color: #fff; text-decoration: none;
+    font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; cursor: pointer;
+    transition: transform 0.12s, background 0.12s, border-color 0.12s;
+  }
+  .pack-dl:hover { background: rgba(255, 255, 255, 0.14); border-color: var(--lime); color: #fff; transform: translate(-1px, -1px); }
+  .pack-dl-primary { background: var(--lime); color: var(--text); border-color: var(--lime); }
+  .pack-dl-primary:hover { background: var(--lime); color: var(--text); }
+  .pack-dl-ext { font-family: var(--font-mono); font-weight: 400; font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); }
+  .pack-dl-primary .pack-dl-ext { color: rgba(17, 17, 16, 0.7); }
+
+  .mod-prose { margin-top: 3rem; }
+
+  @media print {
+    :global(header), :global(footer), :global(#profile-indicator) { display: none !important; }
+    :global(body) { background: #fff !important; }
+    .mod-hero, .sources-strip, .workshop-pack, .mod-prose, .mod-footer { display: none !important; }
+    .fac-session { margin: 0; }
+    .fac-step { page-break-inside: avoid; box-shadow: none; border-color: #ccc; }
+    .fac-script { background: #f4f4f4; }
+  }
+
+  /* ─── Workshop pack ─────────────────────────────────────────────────── */
+  .workshop-pack {
+    background: var(--text);
+    color: white;
+    border-radius: var(--radius);
+    padding: 2rem 2.2rem;
+    margin: 1.5rem 0 2.5rem;
+    box-shadow: 6px 6px 0 var(--lime);
+  }
+  .workshop-pack-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .workshop-pack-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--lime);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  .workshop-pack-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0;
+    color: white;
+  }
+  .workshop-pack-note {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0.4rem 0 0;
+    max-width: 48rem;
+  }
+  .workshop-pack-note a { color: var(--lime); text-decoration: underline; }
+  .workshop-pack-note a:hover { color: white; }
+
+  .asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  .asset-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: start;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.3rem;
+    text-decoration: none;
+    color: white;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+  .asset-card:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--lime);
+    transform: translate(-1px, -1px);
+    color: white;
+  }
+  .asset-icon { font-size: 2rem; line-height: 1; }
+  .asset-body { min-width: 0; }
+  .asset-type {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--lime);
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+  .asset-title {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+    color: white;
+  }
+  .asset-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0.3rem 0 0.5rem;
+    line-height: 1.5;
+  }
+  .asset-meta {
+    display: flex;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
+  .asset-meta span:not(:last-child)::after { content: ' ·'; margin-left: 0.3rem; }
+  .asset-cta {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--lime);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .asset-card:hover .asset-cta { opacity: 1; }
+
+  /* When there's no toggle, show a small meta line instead */
+  .single-version-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+    flex-wrap: wrap;
+  }
+  .single-version-tag {
+    background: var(--text);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  /* Quick recap card */
+  .recap-card {
+    background: var(--lime);
+    border-radius: var(--radius);
+    padding: 2rem 2.2rem;
+    margin: 1rem 0;
+    color: var(--text);
+  }
+  .recap-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+    opacity: 0.7;
+  }
+  .recap-body { font-size: 1.1rem; line-height: 1.5; margin: 0; font-weight: 500; }
+
+  /* Long-form prose */
+  .prose h2 { margin-top: 2.5rem; }
+  .prose h2::before {
+    content: '§ ';
+    color: var(--coral);
+    font-weight: 400;
+  }
+  .prose ul, .prose ol { padding-left: 1.4rem; }
+  .prose li { margin: 0.4rem 0; }
+  .prose strong { color: var(--text); }
+
+  .mod-footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 600px) {
+    .mod-hero { grid-template-columns: 1fr; gap: 1rem; }
+    .mod-hero-number { font-size: 5rem; }
+  }
+</style>
+
+<script>
+  // Modules without a short version always show the long pane.
+  const longPane = document.querySelector<HTMLElement>('[data-version-pane="long"]');
+  const noToggle = longPane?.dataset.noToggle === 'true';
+
+  function syncVersion() {
+    if (noToggle) {
+      longPane?.setAttribute('data-active', 'true');
+      return;
+    }
+    const hash = window.location.hash.replace('#', '');
+    const version = hash === 'short' ? 'short' : 'long';
+    document.querySelectorAll<HTMLElement>('[data-version-pane]').forEach((el) => {
+      el.setAttribute('data-active', el.dataset.versionPane === version ? 'true' : 'false');
+    });
+    document.querySelectorAll<HTMLElement>('.version-btn').forEach((el) => {
+      el.setAttribute('data-active', el.dataset.version === version ? 'true' : 'false');
+    });
+  }
+  document.querySelectorAll<HTMLElement>('.version-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      window.location.hash = btn.dataset.version || 'long';
+    });
+  });
+  window.addEventListener('hashchange', syncVersion);
+  syncVersion();
+</script>

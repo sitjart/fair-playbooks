@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 02 — reveal.js (branded theme)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <style>
+    /* ── Branded reveal theme — same design language as the kit ─────────── */
+    :root {
+      --bg:#faf7f2; --bg-alt:#f3ede3; --ink:#0f0f12; --muted:#6b6b73;
+      --coral:#ff6b4a; --lime:#d4ff4a; --p1:#1a5490; --p1b:#2f7fbf; --amber:#e9a23b; --slate:#3c4a5a;
+      --display:'Space Grotesk',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+    }
+    .reveal {
+      font-family: var(--body);
+      background: var(--bg);
+      background-image: radial-gradient(circle at 1px 1px, rgba(15,15,18,0.05) 1px, transparent 0);
+      background-size: 24px 24px;
+      color: var(--ink);
+    }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: var(--display); letter-spacing: -0.03em; line-height: 1.02; color: var(--ink); text-transform: none; }
+    .reveal .slides section { text-align: left; }
+    .reveal .eyebrow { font-family: var(--mono); font-size: 0.42em; text-transform: uppercase; letter-spacing: 0.18em; color: var(--coral); font-weight: 600; }
+    .reveal .period { color: var(--coral); }
+    .reveal code { font-family: var(--mono); background: var(--bg-alt); padding: 0.05em 0.35em; border-radius: 6px; color: var(--ink); }
+    .reveal em { color: var(--coral); font-style: italic; }
+    .reveal .muted { color: var(--muted); }
+
+    /* Title slide */
+    .reveal .title h1 { font-size: 2.4em; font-weight: 700; margin: 0.2em 0 0.3em; }
+    .reveal .title .sub { font-size: 0.7em; font-weight: 500; }
+
+    /* FAIR cards — bold colour blocks with offset shadows */
+    .reveal .fair-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55em; margin-top: 0.6em; }
+    .reveal .fair-card { border-radius: 16px; padding: 0.55em 0.7em; color: #fff; box-shadow: 7px 7px 0 var(--ink); }
+    .reveal .fair-card .letter { font-family: var(--display); font-weight: 700; font-size: 1.7em; line-height: 1; }
+    .reveal .fair-card .word { font-family: var(--display); font-weight: 600; font-size: 0.62em; }
+    .reveal .fair-card .desc { font-size: 0.4em; opacity: 0.92; margin-top: 0.2em; line-height: 1.3; }
+    .reveal .fair-card.f { background: var(--p1); }
+    .reveal .fair-card.a { background: var(--p1b); }
+    .reveal .fair-card.i { background: var(--amber); box-shadow: 7px 7px 0 var(--ink); }
+    .reveal .fair-card.r { background: var(--slate); }
+
+    /* Finding-the-data slide */
+    .reveal .big-list { list-style: none; padding: 0; margin: 0.4em 0; }
+    .reveal .big-list li { font-size: 0.85em; margin: 0.35em 0; padding-left: 1.6em; position: relative; }
+    .reveal .big-list .pill { position: absolute; left: 0; top: 0.05em; background: var(--ink); color: var(--lime); font-family: var(--display); font-weight: 700; font-size: 0.6em; padding: 0.15em 0.55em; border-radius: 999px; }
+    .reveal .repo-slot { background: var(--lime); padding: 0.08em 0.45em; border-radius: 8px; font-weight: 700; box-shadow: 3px 3px 0 var(--ink); display: inline-block; }
+
+    /* Sticky-note tip — playful, rotated */
+    .reveal .sticky {
+      position: absolute; right: 4%; bottom: 8%; width: 5.2em; transform: rotate(4deg);
+      background: var(--coral); color: #fff; padding: 0.7em 0.8em; border-radius: 6px;
+      font-size: 0.5em; line-height: 1.4; box-shadow: 5px 6px 14px rgba(0,0,0,0.25); font-weight: 500;
+    }
+
+    /* reveal chrome in brand colours */
+    .reveal .progress { color: var(--coral); height: 5px; }
+    .reveal .controls { color: var(--coral); }
+    .reveal .slide-number { background: var(--ink); font-family: var(--mono); }
+
+    .demo-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 40; background: var(--ink); color: #fff; font: 13px/1.5 var(--mono); padding: 0.4rem 1rem; text-align: center; }
+    .demo-banner b { color: var(--lime); }
+    .demo-banner a { color: var(--lime); }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    reveal.js · <b>branded theme</b> · press <b>S</b> speaker view · <b>F</b> fullscreen · <a href="/examples/">← comparison</a>
+  </div>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="title" data-background-color="#faf7f2">
+        <div class="eyebrow">▦ workshop · module 02 · RNA-seq</div>
+        <h1>FAIRification of<br />RNA-seq data<span class="period">.</span></h1>
+        <p class="sub muted">A hands-on workshop for RDM professionals · 45–60 min</p>
+        <p class="sub" style="font-size:0.55em;">Worked dataset: Alivernini et al. 2020 · ArrayExpress <code>E-MTAB-9224</code></p>
+        <aside class="notes">
+          Welcome. We work through a real, published dataset and see the FAIR principles as actual files,
+          accession numbers and metadata decisions — not abstract theory.
+        </aside>
+      </section>
+
+      <section data-background-color="#0f0f12">
+        <h2 style="color:#fff;">The <em>FAIR</em> principles</h2>
+        <div class="fair-grid">
+          <div class="fair-card f"><div class="letter">F</div><div class="word">Findable</div><div class="desc">Persistent IDs · rich, indexed metadata</div></div>
+          <div class="fair-card a"><div class="letter">A</div><div class="word">Accessible</div><div class="desc">Open, standard protocols (HTTPS)</div></div>
+          <div class="fair-card i"><div class="letter">I</div><div class="word">Interoperable</div><div class="desc">Shared vocabularies / ontologies</div></div>
+          <div class="fair-card r"><div class="letter">R</div><div class="word">Reusable</div><div class="desc">Licence · provenance · community standards</div></div>
+        </div>
+        <aside class="notes">
+          A repository gives you F and A almost for free. The I and R — good metadata, ontology terms, a
+          licence — are the researcher's job. That boundary is the whole workshop.
+        </aside>
+      </section>
+
+      <section data-background-color="#faf7f2">
+        <div class="eyebrow">finding the data</div>
+        <h2>F1 &amp; F4 — <em>findable</em></h2>
+        <ul class="big-list">
+          <li><span class="pill">F1</span> the accession <code>E-MTAB-9224</code> is a globally unique, persistent ID</li>
+          <li><span class="pill">F4</span> indexed in ArrayExpress — findable by keyword</li>
+        </ul>
+        <p style="font-size:0.8em; margin-top:0.6em;">Where <em>your</em> researchers deposit:
+          <span class="repo-slot" data-profile-repo>[ your preferred repository ]</span>
+        </p>
+        <div class="sticky">↑ this fills from the institution profile — live, no editing the deck</div>
+        <aside class="notes">
+          F1 is the identifier — cite data like a paper. F4 is discoverability. Point them at YOUR
+          institution's repository, shown live from the profile. This IS the kit, not a downloaded copy.
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({ hash: true, slideNumber: true, transition: 'slide', plugins: [ RevealNotes ] });
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('fair:profile') || 'null');
+        var repo = p && p.help && p.help.repository && p.help.repository.contact;
+        document.querySelectorAll('[data-profile-repo]').forEach(function (slot) {
+          if (repo) slot.textContent = repo;
+          else if (p && p.name) slot.textContent = 'ask ' + (p.contactTeam || p.name);
+        });
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+---
+import yaml from 'js-yaml';
+import fs from 'node:fs';
+import path from 'node:path';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const data = yaml.load(
+  fs.readFileSync(path.resolve('./src/data/parking-lot.yaml'), 'utf8')
+) as { items: Array<{ title: string; addedBy: string; targetVenue: string; note: string }> };
+---
+<BaseLayout title="Parking Lot" description="Ideas surfaced during contentathons that don't fit the current playbook">
+  <h1>🅿 Parking lot</h1>
+  <p class="muted">
+    Ideas that came up during contentathons but don't fit the current playbook —
+    threads for Playbook #2, "we should explore this someday" notes, or out-of-scope-but-promising tangents.
+    Drop ideas here rather than chasing them in a session. We review the list after each contentathon.
+  </p>
+  <p class="muted">
+    Edit <code>src/data/parking-lot.yaml</code> to add items.
+  </p>
+
+  {data.items.map((item) => (
+    <div class="card">
+      <strong>{item.title}</strong>
+      <div class="muted" style="margin-top:0.3rem; font-size:0.85rem;">
+        Added by {item.addedBy} · for: <em>{item.targetVenue}</em>
+      </div>
+      <p style="margin: 0.6rem 0 0;">{item.note}</p>
+    </div>
+  ))}
+</BaseLayout>

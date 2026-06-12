@@ -1,0 +1,73 @@
+# ─────────────────────────────────────────────────────────────────────
+# Auto-deploys the FAIR playbooks site to GitHub Pages on every push to main.
+#
+# One-time setup after you push this repo to GitHub:
+#   1. Go to: Settings → Pages
+#   2. Under "Build and deployment", set "Source" to "GitHub Actions"
+#   3. (Optional) Add a custom domain in the same settings page
+#
+# That's it. After that, every push to main rebuilds and redeploys
+# automatically. The deployed URL will appear in the Actions tab.
+# ─────────────────────────────────────────────────────────────────────
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # lets you trigger a deploy manually from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; cancel queued runs if a new push arrives.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Generate editable .pptx (slides) + .docx (facilitator guide) from each
+      # module's `session:` source. pandoc renders them; librsvg rasterises SVGs.
+      # Drop scripts/reference.pptx / reference.docx to brand the output.
+      - name: Generate editable decks
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq pandoc librsvg2-bin python3-pip
+          pip3 install --quiet python-pptx pyyaml
+          node scripts/session-to-decks.mjs       # .docx facilitator guide (pandoc)
+          python3 scripts/session_to_pptx.py      # banded .pptx (python-pptx)
+
+      - name: Build Astro site
+        run: npm run build
+
+      - name: Upload built site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

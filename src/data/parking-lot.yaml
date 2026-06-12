@@ -1,0 +1,41 @@
+# Parking lot — ideas that surfaced during contentathons but don't fit
+# the current playbook. Carried forward for Playbook #2 or future work.
+#
+# Seeded from Contentathon #2 (2026-05-28). RDM Club members add to this
+# list as ideas come up; review at the end of each contentathon.
+
+items:
+  - title: "A reusable training layer for students / PhDs"
+    addedBy: "—"
+    targetVenue: "Future work"
+    note: "Data-management teaching standards across universities are poor; today's materials could be repurposed for postgraduate teaching."
+
+  - title: "Shaping minimum standards for metadata / sample information"
+    addedBy: "ECG"
+    targetVenue: "Contentathon #2 follow-up"
+    note: "Practical examples linked to particular experimental designs + examples across the variety of data-acquisition technologies."
+
+  - title: "Use cases as the primary content frame"
+    addedBy: "ECG"
+    targetVenue: "Cross-cutting"
+    note: "Across rooms, use cases (Unpublished / Published / Legacy) were repeatedly highlighted as the thing that makes content relatable. Now reflected in Module 4 structure."
+
+  - title: "Interactivity!"
+    addedBy: "ECG"
+    targetVenue: "Cross-cutting"
+    note: "Multiple comments promoted this. Flashcards, decision wizards, branching scenarios — make the playbook do something, not just say things."
+
+  - title: "Making metadata FAIR when data can't be open"
+    addedBy: "AMT"
+    targetVenue: "Module 0 or Playbook #2"
+    note: "FAIR ≠ open. Metadata can still be FAIR even when underlying data must stay closed. Important framing for the intro module."
+
+  - title: "The value of FAIR data/metadata when it can't be open"
+    addedBy: "NO"
+    targetVenue: "Intro modules"
+    note: "Mentioned in many sessions. Has to be part of the intro module(s) — sets expectations correctly from the start."
+
+  - title: "What are the FAIR principles?"
+    addedBy: "RA"
+    targetVenue: "Module 0 (Contentathon #3)"
+    note: "The principles are referenced throughout but never actually stated. Module 0 needs to ground them clearly."

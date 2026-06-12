@@ -1,0 +1,334 @@
+---
+import { getCollection } from 'astro:content';
+import yaml from 'js-yaml';
+import fs from 'node:fs';
+import path from 'node:path';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const modules = (await getCollection('modules')).sort((a, b) => a.data.number - b.data.number);
+const journeys = await getCollection('journeys');
+const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8')) as any;
+---
+<BaseLayout title="Home" description="A facilitator's kit for RDM professionals running FAIR sessions — choose, adapt, deploy">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">For the person running the session — not taking it</div>
+    <h1 class="hero-title">
+      Don't reinvent<br />the <em>workshop</em>
+      <span class="hero-period">.</span>
+    </h1>
+    <p class="hero-sub">
+      {rpo.isCustomised
+        ? <>You support researchers with FAIR at <strong>{rpo.name}</strong>. This is a kit of facilitator-ready activities — translated from RDMkit, the FAIR Cookbook, Galaxy and more — that you <strong>pick from</strong>, <strong>adapt</strong> to your institution, and <strong>run</strong>.</>
+        : <>You support researchers with FAIR. This is a kit of facilitator-ready activities — translated from RDMkit, the FAIR Cookbook, Galaxy and more — that you <strong>pick from</strong>, <strong>adapt</strong> to your institution, and <strong>run</strong>. Maintained by the ELIXIR-UK RDM Club.</>
+      }
+    </p>
+    <div class="hero-cta">
+      <a href="/recommend/" class="btn btn-primary">→ Build a session</a>
+      <a href="/branding/" class="hero-link">or set it up for your institution ↗</a>
+    </div>
+  </section>
+
+  <!-- DIFFERENTIATOR — what this is, and isn't -->
+  <section class="diff">
+    <div class="diff-banner">
+      <span class="diff-not">This is <strong>not</strong> another FAIR course.</span>
+      <span class="diff-is">It's the layer between FAIR guidance and a session you can run tomorrow.</span>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-pillar">
+        <div class="diff-num">choose</div>
+        <strong>Pick what fits</strong>
+        <p>Answer five questions about your audience, data type and scenario. The kit surfaces the right activities — and tells you why each one matched.</p>
+      </div>
+      <div class="diff-pillar">
+        <div class="diff-num">adapt</div>
+        <strong>Make it yours</strong>
+        <p>~80% ready-to-use; the rest is placeholders for your repositories, policies, contacts and examples. Set it up once and the whole kit speaks for your institution — no fork to keep in sync.</p>
+      </div>
+      <div class="diff-pillar">
+        <div class="diff-num">deploy</div>
+        <strong>Run it locally</strong>
+        <p>Facilitator scripts, slide decks and worked exercises — drawn from established resources, not reinvented. Walk in and deliver.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOURNEYS -->
+  <section>
+    <h2 class="section-head"><span class="section-num">01</span> Start from a ready-made session</h2>
+    <p class="muted">Tested session plans through the activities. Pick the closest scenario, or <a href="/recommend/">build your own</a>.</p>
+    <div class="journey-grid">
+      {journeys.map((journey) => (
+        <a href={`/journeys/${journey.id}/`} class="card journey-card">
+          <strong>{journey.data.title}</strong>
+          <div class="muted" style="margin-top:0.4rem;">{journey.data.scenario}</div>
+          <div class="journey-cta">explore →</div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- MODULES -->
+  <section>
+    <h2 class="section-head"><span class="section-num">02</span> The activities</h2>
+    <p class="muted">Facilitator-ready building blocks, translated from established FAIR resources — not reinvented. Each has a quick recap (≤10 min) and a full version; tags show which playbook it serves and what it's for.</p>
+    <div class="module-grid">
+      {modules.map((mod) => (
+        <a href={`/modules/${mod.id}/`} class="card module-card">
+          <div class="module-card-top">
+            <div class="module-number">{mod.data.isSideRoom ? '↗' : String(mod.data.number).padStart(2, '0')}</div>
+            <div class="module-pbs">
+              {mod.data.playbook.map((pb) => (
+                <span class="pb-badge" data-pb={pb}>
+                  {pb === 'fairification' ? 'P1' : 'P2'}
+                </span>
+              ))}
+              {mod.data.isSideRoom && <span class="badge">side</span>}
+            </div>
+          </div>
+          <strong class="module-title">{mod.data.title}</strong>
+          <p class="module-summary">{mod.data.summary}</p>
+          <div class="module-meta">
+            {mod.data.estimatedMinutes.short !== undefined && (
+              <>
+                <span>recap {mod.data.estimatedMinutes.short}m</span>
+                <span>·</span>
+              </>
+            )}
+            <span>full {mod.data.estimatedMinutes.long}m</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- MAKE IT YOURS — the local-adaptation differentiator -->
+  <section id="make-it-yours">
+    <h2 class="section-head"><span class="section-num">03</span> {rpo.isCustomised ? `Adapted for ${rpo.shortName}` : 'Make it yours'}</h2>
+    {rpo.isCustomised ? (
+      <>
+        <p class="muted">This playbook has been forked and adapted for <strong>{rpo.name}</strong>. Every activity now points researchers here:</p>
+        <div class="card local-card">
+          <p><strong>Contact:</strong> <a href={`mailto:${rpo.contact.email}`}>{rpo.contact.email}</a> ({rpo.contact.team})</p>
+          <p><strong>Local policies:</strong> <a href={rpo.policiesUrl}>{rpo.policiesUrl}</a></p>
+          <p><strong>Facilitators:</strong></p>
+          <ul>
+            {rpo.facilitators.map((f: any) => (
+              <li>{f.name} — {f.role} — <a href={`mailto:${f.email}`}>{f.email}</a></li>
+            ))}
+          </ul>
+        </div>
+      </>
+    ) : (
+      <>
+        <p class="muted">This is the difference between a kit and a course: you fill in <em>your</em> repositories, policies, contacts and examples <strong>once</strong> — and every activity starts speaking for your institution. No fork, so you never fall behind the kit.</p>
+        <div class="yours-grid">
+          <div class="card yours-step">
+            <div class="yours-num">1</div>
+            <strong>Fill one short profile</strong>
+            <p class="muted">On the <a href="/branding/">set-up page</a>: your facilitators, repositories, DMP and ethics contacts, local policies.</p>
+          </div>
+          <div class="card yours-step">
+            <div class="yours-num">2</div>
+            <strong>It flows everywhere</strong>
+            <p class="muted">Every "ask your local RDM team" callout and slide placeholder now names <em>your</em> team — across the whole kit.</p>
+          </div>
+          <div class="card yours-step">
+            <div class="yours-num">3</div>
+            <strong>Always current</strong>
+            <p class="muted">When the Club ships a new activity, you get it instantly — already wired to your profile. Nothing to re-sync.</p>
+          </div>
+        </div>
+        <div class="card local-card" style="border-left: 4px solid var(--coral);">
+          <strong>Prefer to fork it? You can.</strong>
+          <p class="muted" style="margin-top:0.4rem;">
+            Forking is fine if your institution wants its own copy to change freely. But most teams don't need to —
+            and there's a cost: a fork freezes the day you make it, so every new module and fix upstream passes you by,
+            and you take on maintaining a diverging copy. The <a href="/branding/">set-up page</a> avoids all that —
+            your details ride on top of one always-current kit, and new activities appear automatically.
+            Fork when you genuinely need deep local changes; use the set-up page for everything else.
+          </p>
+        </div>
+      </>
+    )}
+  </section>
+
+<style>
+  .hero {
+    margin: 1rem 0 4rem;
+    position: relative;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+  .hero-title {
+    font-size: clamp(2.8rem, 7vw, 5.2rem);
+    line-height: 0.95;
+    margin: 0 0 1.5rem;
+    font-weight: 700;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--coral);
+    font-weight: 700;
+  }
+  .hero-period { color: var(--coral); }
+  .hero-sub {
+    font-size: 1.15rem;
+    max-width: 38rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+  .hero-cta {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .hero-link {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--text);
+    padding-bottom: 0.1rem;
+  }
+  .hero-link:hover { color: var(--coral); border-color: var(--coral); }
+
+  /* ─── Differentiator strip ───────────────────────────────────────────── */
+  .diff { margin: 0 0 4rem; }
+  .diff-banner {
+    border: 1.5px solid var(--text);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+    background: var(--lime);
+  }
+  .diff-not { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
+  .diff-is { color: var(--text); font-size: 0.98rem; opacity: 0.8; }
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .diff-pillar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.4rem;
+    box-shadow: var(--shadow-card);
+  }
+  .diff-pillar strong { display: block; font-family: var(--font-display); font-size: 1.15rem; margin: 0.3rem 0 0.5rem; }
+  .diff-pillar p { color: var(--muted); font-size: 0.9rem; margin: 0; line-height: 1.5; }
+  .diff-num {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--coral);
+    font-weight: 600;
+  }
+
+  /* ─── Make-it-yours steps ────────────────────────────────────────────── */
+  .yours-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .yours-step { position: relative; padding-top: 1.6rem; }
+  .yours-step strong { display: block; font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 0.4rem; }
+  .yours-step p { margin: 0; }
+  .yours-num {
+    position: absolute;
+    top: -0.8rem;
+    left: 1.2rem;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    background: var(--coral);
+    color: white;
+    border-radius: 50%;
+    font-family: var(--font-display);
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--text);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--coral);
+    font-weight: 500;
+  }
+
+  .journey-grid, .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .journey-card { display: flex; flex-direction: column; min-height: 140px; }
+  .journey-cta {
+    margin-top: auto;
+    padding-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--coral);
+  }
+
+  .module-card { display: flex; flex-direction: column; }
+  .module-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.6rem;
+  }
+  .module-number {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--text);
+  }
+  .module-card:hover .module-number { color: var(--coral); }
+  .module-pbs { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+  .module-title { font-size: 1.1rem; line-height: 1.3; display: block; margin-top: 0.3rem; }
+  .module-summary {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin: 0.6rem 0 1rem;
+    flex: 1;
+  }
+  .module-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 0.8rem;
+  }
+
+  .local-card ul { padding-left: 1.2rem; }
+  .local-card li { margin: 0.3rem 0; }
+</style>
+</BaseLayout>

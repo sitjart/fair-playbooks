@@ -1,0 +1,22 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const journeys = await getCollection('journeys');
+---
+<BaseLayout title="User journeys">
+  <h1>User journeys</h1>
+  <p class="muted">
+    Pre-built paths through the modules, designed for common scenarios. Each journey picks the
+    right modules in the right order, at the right length.
+  </p>
+  {journeys.map((journey) => (
+    <a href={`/journeys/${journey.id}/`} class="card" style="display:block; text-decoration:none; color:inherit;">
+      <strong>{journey.data.title}</strong>
+      <div class="muted" style="margin-top:0.3rem;">{journey.data.scenario}</div>
+      <div class="muted" style="margin-top:0.5rem; font-size:0.85rem;">
+        For: {journey.data.audience} · {journey.data.path.length} modules
+      </div>
+    </a>
+  ))}
+</BaseLayout>

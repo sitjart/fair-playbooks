@@ -1,0 +1,89 @@
+# ─────────────────────────────────────────────────────────────────────
+# This is the CANONICAL ELIXIR-UK RDM Club source playbook.
+#
+# When an RPO forks this repository, they edit THIS file to brand the
+# playbook for their institution. Everything else in the site reads
+# from these values.
+#
+# To customise for your institution:
+#   1. Fork this repo to your institution's GitHub org
+#   2. Edit the values below
+#   3. Push — your fork auto-deploys to your own GitHub Pages
+# ─────────────────────────────────────────────────────────────────────
+
+# Set isCustomised: true once your institution has filled in this file.
+isCustomised: false
+
+name: "ELIXIR-UK RDM Club"
+shortName: "ELIXIR-UK"
+contact:
+  email: "rdmclub@elixiruknode.org"
+  team: "ELIXIR-UK RDM Club coordinators"
+policiesUrl: "https://elixiruknode.org/"
+
+# Repositories your institution recommends or hosts.
+preferredRepositories:
+  - name: "ENA"
+    type: "Sequencing"
+    url: "https://www.ebi.ac.uk/ena"
+    notes: "Default for raw sequencing reads (life sciences)."
+  - name: "PRIDE"
+    type: "Proteomics"
+    url: "https://www.ebi.ac.uk/pride"
+    notes: "Default for mass spectrometry data."
+  - name: "Zenodo"
+    type: "Generic / supplementary"
+    url: "https://zenodo.org/"
+    notes: "Use for bespoke data, code, supplementary files."
+
+# Facilitators at your institution.
+facilitators:
+  - name: "Your local data steward"
+    role: "(replace this entry when you customise the playbook)"
+    email: "rdmclub@elixiruknode.org"
+
+# ─────────────────────────────────────────────────────────────────────
+# INSTITUTIONAL HELP — the most important RPO customisation.
+#
+# Every module references these by category (e.g. <InstitutionalHelp
+# category="dmp">). When an RPO fills these in, the playbook becomes
+# concretely useful at their institution. Leave any category empty
+# and the corresponding callout shows a generic "ask your local RDM
+# professional" message.
+# ─────────────────────────────────────────────────────────────────────
+institutionalHelp:
+  dmp:
+    label: "Data Management Plan advice"
+    contact: "Research Office DMP advisor (generic — replace when forking)"
+    url: ""
+  repository:
+    label: "Institutional repository support"
+    contact: "Library research support team (generic — replace when forking)"
+    url: ""
+  ethics:
+    label: "Ethics and legal review"
+    contact: "Research Ethics Committee (generic — replace when forking)"
+    url: ""
+  licensing:
+    label: "Licensing advice"
+    contact: "Library (often the right first port of call)"
+    url: ""
+  it:
+    label: "IT / data conversion support"
+    contact: "Institutional IT services"
+    url: ""
+  training:
+    label: "RDM training / Carpentries"
+    contact: "Local Carpentries instructor or library training team"
+    url: ""
+
+# Branding tweaks per RPO.
+theme:
+  accentColor: "#1a5490"
+  # Optional: path to an institutional logo (PNG or SVG) in public/assets/branding/.
+  # When set, the logo appears in the site header and on workshop-pack downloads
+  # that the fork ships in its own public/assets/modules/<id>/ folder.
+  # Leave empty (or omit) on the canonical source playbook.
+  logoUrl: ""
+  # Optional alt text for accessibility.
+  logoAlt: ""

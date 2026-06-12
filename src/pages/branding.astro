@@ -1,0 +1,313 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Institutional-help categories — must match the keys the InstitutionalHelp
+// component and the hydration script in BaseLayout look up.
+const helpCategories = [
+  { key: 'repository', label: 'Institutional repository support' },
+  { key: 'dmp', label: 'Data Management Plan advice' },
+  { key: 'ethics', label: 'Ethics and legal review' },
+  { key: 'licensing', label: 'Licensing advice' },
+  { key: 'it', label: 'IT / data conversion support' },
+  { key: 'training', label: 'RDM training / Carpentries' },
+];
+---
+<BaseLayout title="Set up your institution" description="Fill local details once — they flow into every activity. No fork.">
+  <div class="brand-eyebrow">make it yours →</div>
+  <h1 class="brand-title">Set up <em>your</em> institution</h1>
+  <p class="brand-sub">
+    Fill this in <strong>once</strong>. Your repositories, contacts and policies flow into every
+    activity, slide placeholder and "local help" box across the kit — on <em>this</em> canonical site.
+    Nothing is forked, so when the RDM Club ships a new activity, you get it instantly, already wired
+    to these details.
+  </p>
+
+  <div class="brand-callout">
+    <strong>Why not just fork the repo?</strong>
+    Because a fork freezes the day you make it — every new module and fix upstream would pass you by.
+    This profile lives in your browser and rides on top of the always-current kit. Export it to share
+    one profile across your whole RDM team.
+  </div>
+
+  <form id="brand-form" class="brand-form">
+    <fieldset>
+      <legend>Your institution</legend>
+      <label>Institution name <input type="text" name="name" placeholder="University of Wessex" required /></label>
+      <label>Short name <input type="text" name="shortName" placeholder="Wessex" /></label>
+      <label>RDM contact email <input type="email" name="contactEmail" placeholder="rdm@wessex.ac.uk" /></label>
+      <label>RDM team name <input type="text" name="contactTeam" placeholder="Wessex Research Data Service" /></label>
+      <label>Local RDM/FAIR policies URL <input type="url" name="policiesUrl" placeholder="https://wessex.ac.uk/research-data" /></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Brand (optional)</legend>
+      <p class="brand-hint">Recolour the live site and swap the header logo for your institution. (Downloads stay branded via your uploaded reference template.)</p>
+      <div class="brand-colours">
+        <label>Primary colour <input type="text" name="brandPrimary" placeholder="#07A46F" /></label>
+        <label>Accent colour <input type="text" name="brandAccent" placeholder="#D9115A" /></label>
+        <label>Logo (PNG or SVG) <input type="file" id="brand-logo-file" accept="image/png,image/svg+xml,image/jpeg" /></label>
+      </div>
+      <p class="brand-hint" id="brand-logo-status" hidden></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Where researchers get local help</legend>
+      <p class="brand-hint">These replace the generic "ask your local RDM professional" placeholders inside the activities.</p>
+      {helpCategories.map((c) => (
+        <div class="help-row" data-cat={c.key}>
+          <span class="help-label">{c.label}</span>
+          <input type="text" data-field="contact" placeholder="Team / contact name" />
+          <input type="url" data-field="url" placeholder="https:// (optional)" />
+        </div>
+      ))}
+    </fieldset>
+
+    <div class="brand-actions">
+      <button type="submit" class="btn btn-primary">Save — apply across the kit</button>
+      <button type="button" id="brand-demo" class="btn">Load a demo institution</button>
+      <button type="button" id="brand-clear" class="brand-text-btn">Clear &amp; view canonical</button>
+    </div>
+    <div id="brand-status" class="brand-status" hidden></div>
+  </form>
+
+  <div class="brand-share">
+    <h2>Share one profile across your team</h2>
+    <p class="muted">Export your profile as a small file and send it to colleagues — they import it instead of re-typing. (This is the lightweight stand-in for a future hosted institution profile.)</p>
+    <div class="brand-actions">
+      <button type="button" id="brand-export" class="btn">↓ Export profile</button>
+      <label class="btn brand-import-label">↑ Import profile<input type="file" id="brand-import" accept="application/json" hidden /></label>
+    </div>
+  </div>
+
+  <p class="brand-back"><a href="/">← back to the kit</a> · then open any activity and watch the "local help" boxes fill in.</p>
+</BaseLayout>
+
+<script is:inline define:vars={{ helpCategories }}>
+  document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('brand-form');
+    var status = document.getElementById('brand-status');
+    var logoStatus = document.getElementById('brand-logo-status');
+    var logoData = null;
+
+    var logoInput = document.getElementById('brand-logo-file');
+    if (logoInput) logoInput.addEventListener('change', function (e) {
+      var f = e.target.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onload = function () {
+        logoData = r.result;
+        logoStatus.textContent = '✓ Logo loaded (' + Math.round(f.size / 1024) + ' KB) — Save to apply it across the site.';
+        logoStatus.hidden = false;
+      };
+      r.readAsDataURL(f);
+    });
+
+    function fillForm(p) {
+      if (!p) p = {};
+      ['name', 'shortName', 'contactEmail', 'contactTeam', 'policiesUrl'].forEach(function (k) {
+        var el = form.elements[k];
+        if (el) el.value = p[k] || '';
+      });
+      document.querySelectorAll('.help-row').forEach(function (row) {
+        var cat = row.getAttribute('data-cat');
+        var entry = (p.help && p.help[cat]) || {};
+        var c = row.querySelector('[data-field="contact"]');
+        var u = row.querySelector('[data-field="url"]');
+        if (c) c.value = entry.contact || '';
+        if (u) u.value = entry.url || '';
+      });
+      var b = p.brand || {};
+      if (form.elements['brandPrimary']) form.elements['brandPrimary'].value = b.primary || '';
+      if (form.elements['brandAccent']) form.elements['brandAccent'].value = b.accent || '';
+      logoData = b.logo || null;
+      if (logoStatus) {
+        logoStatus.hidden = !b.logo;
+        if (b.logo) logoStatus.textContent = '✓ Custom logo set for this institution.';
+      }
+    }
+
+    function readForm() {
+      var p = {
+        name: form.elements['name'].value.trim(),
+        shortName: form.elements['shortName'].value.trim(),
+        contactEmail: form.elements['contactEmail'].value.trim(),
+        contactTeam: form.elements['contactTeam'].value.trim(),
+        policiesUrl: form.elements['policiesUrl'].value.trim(),
+        help: {}
+      };
+      if (!p.shortName) p.shortName = p.name;
+      document.querySelectorAll('.help-row').forEach(function (row) {
+        var cat = row.getAttribute('data-cat');
+        var contact = row.querySelector('[data-field="contact"]').value.trim();
+        var url = row.querySelector('[data-field="url"]').value.trim();
+        if (contact || url) p.help[cat] = { contact: contact, url: url };
+      });
+      var primary = form.elements['brandPrimary'].value.trim();
+      var accent = form.elements['brandAccent'].value.trim();
+      if (primary || accent || logoData) p.brand = { primary: primary, accent: accent, logo: logoData || '' };
+      return p;
+    }
+
+    function flash(msg) {
+      status.textContent = msg;
+      status.hidden = false;
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var p = readForm();
+      if (!p.name) { flash('Add at least an institution name.'); return; }
+      window.FairProfile.set(p);
+      flash('✓ Saved. Every activity now shows ' + p.name + '. Open a module to see the local-help boxes filled in.');
+    });
+
+    document.getElementById('brand-clear').addEventListener('click', function () {
+      window.FairProfile.clear();
+      fillForm(null);
+      flash('Cleared. You\'re back to the canonical ELIXIR-UK kit.');
+    });
+
+    document.getElementById('brand-demo').addEventListener('click', function () {
+      var demo = {
+        name: 'University of Wessex',
+        shortName: 'Wessex',
+        contactEmail: 'researchdata@wessex.ac.uk',
+        contactTeam: 'Wessex Research Data Service',
+        policiesUrl: 'https://wessex.ac.uk/research-data-policy',
+        help: {
+          repository: { contact: 'Wessex Data Repository (DSpace) — library data team', url: 'https://data.wessex.ac.uk' },
+          dmp: { contact: 'Research Office — DMP clinic, Tuesdays 2pm', url: 'https://wessex.ac.uk/dmp' },
+          ethics: { contact: 'Faculty Research Ethics Committee', url: 'https://wessex.ac.uk/ethics' },
+          licensing: { contact: 'Library scholarly communications team', url: '' },
+          it: { contact: 'Research Computing — large-data transfer & conversion', url: 'https://wessex.ac.uk/research-computing' },
+          training: { contact: 'Wessex Carpentries chapter — monthly RDM workshops', url: '' }
+        },
+        brand: { primary: '#1f6feb', accent: '#e9a23b', logo: '' }
+      };
+      fillForm(demo);
+      window.FairProfile.set(demo);
+      flash('✓ Loaded a demo institution. Browse to any module — the local-help boxes now say "Wessex". (Clear when done.)');
+    });
+
+    document.getElementById('brand-export').addEventListener('click', function () {
+      var p = window.FairProfile.get() || readForm();
+      var blob = new Blob([JSON.stringify(p, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (p.shortName || 'institution') + '-fair-profile.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('brand-import').addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var p = JSON.parse(reader.result);
+          fillForm(p);
+          window.FairProfile.set(p);
+          flash('✓ Imported ' + (p.name || 'profile') + '. Applied across the kit.');
+        } catch (err) { flash('That file was not a valid profile.'); }
+      };
+      reader.readAsText(file);
+    });
+
+    fillForm(window.FairProfile.get());
+  });
+</script>
+
+<style>
+  .brand-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--coral);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .brand-title { font-size: clamp(2.2rem, 5vw, 3.4rem); margin-bottom: 0.6rem; }
+  .brand-title em { color: var(--coral); font-style: italic; }
+  .brand-sub { font-size: 1.05rem; color: var(--muted); max-width: 42rem; line-height: 1.6; }
+
+  .brand-callout {
+    border-left: 4px solid var(--coral);
+    background: var(--bg-alt);
+    padding: 1rem 1.3rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1.5rem 0 2.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .brand-callout strong { display: block; font-family: var(--font-display); margin-bottom: 0.2rem; }
+
+  .brand-form fieldset {
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.6rem;
+    margin: 0 0 1.5rem;
+  }
+  .brand-form legend {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 0 0.5rem;
+  }
+  .brand-hint { color: var(--muted); font-size: 0.9rem; margin-top: 0; }
+  .brand-form label { display: block; font-weight: 500; margin: 0.9rem 0; font-size: 0.92rem; }
+  .brand-form input {
+    display: block;
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.6rem 0.8rem;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    background: var(--card);
+  }
+  .brand-form input:focus { outline: none; border-color: var(--coral); }
+
+  .help-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.7rem;
+    align-items: center;
+    margin: 0.7rem 0;
+  }
+  .help-row .help-label { font-weight: 600; font-size: 0.9rem; }
+  .help-row input { margin-top: 0; }
+  .brand-colours { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+  @media (max-width: 600px) { .brand-colours { grid-template-columns: 1fr; } }
+
+  .brand-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin: 1.5rem 0; }
+  .brand-text-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    text-decoration: underline;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+  }
+  .brand-text-btn:hover { color: var(--coral); }
+  .brand-import-label { cursor: pointer; }
+
+  .brand-status {
+    background: var(--lime);
+    color: var(--text);
+    padding: 0.8rem 1.1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .brand-share { border-top: 1px solid var(--border); margin-top: 2.5rem; padding-top: 1.5rem; }
+  .brand-back { margin-top: 2.5rem; color: var(--muted); font-size: 0.92rem; }
+
+  @media (max-width: 600px) {
+    .help-row { grid-template-columns: 1fr; gap: 0.4rem; }
+  }
+</style>

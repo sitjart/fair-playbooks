@@ -1,0 +1,143 @@
+---
+// Lightweight, dependency-free "present mode" in the project's own stack.
+// Slides + facilitator script side by side; institutional placeholders fill
+// live from the same `fair:profile` the rest of the kit uses.
+const slides = [
+  {
+    title: 'FAIRification of RNAseq Data',
+    body: `<p class="lead">A hands-on workshop for RDM professionals · 45–60 min</p>
+           <p class="meta">Worked dataset: Alivernini et al. 2020 · ArrayExpress <code>E-MTAB-9224</code></p>`,
+    script: `Welcome. We work through a real, published dataset and see the FAIR principles as actual files,
+             accession numbers and metadata decisions — not abstract theory. By the end they'll have
+             appraised real metadata and know what a minimum-viable RNAseq submission needs.`,
+  },
+  {
+    title: 'The FAIR Principles',
+    body: `<div class="grid">
+             <div><b>F</b> Findable — persistent IDs, rich indexed metadata</div>
+             <div><b>A</b> Accessible — open standard protocols (HTTPS)</div>
+             <div><b>I</b> Interoperable — shared vocabularies / ontologies</div>
+             <div><b>R</b> Reusable — licence, provenance, community standards</div>
+           </div>`,
+    script: `FAIR = Findable, Accessible, Interoperable, Reusable (Wilkinson et al. 2016). The one thing to
+             land: a repository gives you F and A almost for free. The I and R — good metadata, ontology
+             terms, a licence — are the researcher's job. That boundary is the whole workshop.`,
+  },
+  {
+    title: 'Finding the data — F1 &amp; F4',
+    body: `<ul>
+             <li><b>F1</b> — the accession <code>E-MTAB-9224</code> is a globally unique, persistent ID</li>
+             <li><b>F4</b> — indexed in ArrayExpress, findable by keyword</li>
+           </ul>
+           <p class="fill">Where <em>your</em> researchers should deposit:
+             <span class="repo-slot" data-profile-repo>[ your institution's preferred repository ]</span>
+           </p>`,
+    script: `F1 is the identifier — cite data like you cite a paper. F4 is discoverability. Then point them at
+             YOUR institution's preferred repository — shown on the slide from the institution profile. No
+             editing the deck: it's filled because this IS the live kit, not a downloaded copy.`,
+  },
+];
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 02 — custom present mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#faf7f2; --text:#0f0f12; --muted:#6b6b73; --coral:#ff6b4a; --lime:#d4ff4a;
+      --display:'Space Grotesk',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:var(--body); background:var(--text); color:#fff; height:100vh; display:flex; flex-direction:column; }
+    .bar { background:#0f0f12; font:13px/1.5 var(--mono); padding:0.4rem 1rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; border-bottom:1px solid #2a2a33; }
+    .bar a { color:var(--lime); }
+    .stage { flex:1; display:grid; grid-template-columns:1.6fr 1fr; gap:0; min-height:0; }
+    .slide { background:var(--bg); color:var(--text); padding:3rem 3.2rem; display:flex; flex-direction:column; justify-content:center; overflow:auto; }
+    .slide h1 { font-family:var(--display); font-size:clamp(1.8rem,3.5vw,3rem); margin:0 0 1rem; letter-spacing:-0.02em; }
+    .slide h2 { font-family:var(--display); font-size:clamp(1.6rem,3vw,2.4rem); margin:0 0 1.2rem; letter-spacing:-0.02em; }
+    .slide .lead { font-size:1.2rem; }
+    .slide .meta { color:var(--muted); font-size:0.95rem; }
+    .slide code { font-family:var(--mono); background:#f3ede3; padding:0.1em 0.4em; border-radius:5px; }
+    .slide .grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+    .slide .grid div { background:#f3ede3; border-radius:12px; padding:1rem 1.2rem; }
+    .slide .grid b { color:var(--coral); font-size:1.5em; margin-right:0.3rem; }
+    .slide ul { font-size:1.1rem; line-height:1.8; }
+    .slide .fill { margin-top:1.5rem; font-size:1.1rem; }
+    .repo-slot { background:var(--lime); padding:0.1em 0.45em; border-radius:6px; font-weight:600; }
+    .script { background:#15151c; padding:2rem 2.2rem; overflow:auto; border-left:3px solid var(--coral); }
+    .script .label { font:0.72rem var(--mono); text-transform:uppercase; letter-spacing:0.12em; color:var(--lime); margin-bottom:0.8rem; }
+    .script p { font-size:1.05rem; line-height:1.65; color:#e8e8ee; }
+    .nav { display:flex; gap:0.6rem; align-items:center; }
+    .nav button { background:transparent; border:1px solid #444; color:#fff; border-radius:999px; padding:0.3rem 0.9rem; cursor:pointer; font-family:var(--mono); font-size:0.8rem; }
+    .nav button:hover { border-color:var(--lime); color:var(--lime); }
+    .counter { font-family:var(--mono); font-size:0.8rem; color:var(--muted); }
+    @media print {
+      .bar { display:none; }
+      body { height:auto; display:block; }
+      .stage { display:block; }
+      .slide { min-height:90vh; page-break-after:always; }
+      .script { background:#fff; color:#000; border-left:3px solid var(--coral); }
+      .script p { color:#000; }
+    }
+    @media (max-width:760px) { .stage { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <span>custom present mode · no dependencies · slides + script side-by-side</span>
+    <span class="nav">
+      <span class="counter"><span id="cur">1</span> / {slides.length}</span>
+      <button id="prev">← prev</button>
+      <button id="next">next →</button>
+      <button onclick="window.print()">⎙ export PDF</button>
+      <a href="/examples/">back to comparison</a>
+    </span>
+  </div>
+
+  {slides.map((s, i) => (
+    <div class="stage" data-slide={i} style={i === 0 ? '' : 'display:none'}>
+      <div class="slide">
+        <h1 set:html={i === 0 ? s.title : ''} style={i === 0 ? '' : 'display:none'}></h1>
+        {i !== 0 && <h2 set:html={s.title}></h2>}
+        <div set:html={s.body}></div>
+      </div>
+      <div class="script">
+        <div class="label">🗣 facilitator script — slide {i + 1}</div>
+        <p>{s.script}</p>
+      </div>
+    </div>
+  ))}
+
+  <script is:inline>
+    (function () {
+      var i = 0;
+      var stages = document.querySelectorAll('.stage');
+      var cur = document.getElementById('cur');
+      function show(n) {
+        i = Math.max(0, Math.min(stages.length - 1, n));
+        stages.forEach(function (s, idx) { s.style.display = idx === i ? 'grid' : 'none'; });
+        cur.textContent = i + 1;
+      }
+      document.getElementById('prev').addEventListener('click', function () { show(i - 1); });
+      document.getElementById('next').addEventListener('click', function () { show(i + 1); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === ' ') show(i + 1);
+        if (e.key === 'ArrowLeft') show(i - 1);
+      });
+      // Fill institutional placeholder from the same profile the rest of the kit uses.
+      try {
+        var p = JSON.parse(localStorage.getItem('fair:profile') || 'null');
+        var repo = p && p.help && p.help.repository && p.help.repository.contact;
+        document.querySelectorAll('[data-profile-repo]').forEach(function (slot) {
+          if (repo) slot.textContent = repo;
+          else if (p && p.name) slot.textContent = 'ask ' + (p.contactTeam || p.name);
+        });
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

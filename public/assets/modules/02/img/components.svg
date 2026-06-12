@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="340" viewBox="0 0 900 340" font-family="'Lato', 'Helvetica Neue', Arial, sans-serif">
+  <rect width="900" height="340" fill="#ffffff"/>
+  <text x="40" y="56" font-size="30" font-weight="700" fill="#023452">Three components of an RNA-seq submission</text>
+  <text x="40" y="86" font-size="17" fill="#4a6577">All linked by the accession — metadata is where FAIR is won or lost</text>
+
+  <!-- Metadata (ELIXIR navy) -->
+  <g>
+    <rect x="40" y="120" width="250" height="170" rx="16" fill="#023452"/>
+    <text x="64" y="166" font-size="22" font-weight="700" fill="#ffffff">1 · Metadata</text>
+    <text x="64" y="198" font-size="15" fill="#c9d6e0">Samples, conditions,</text>
+    <text x="64" y="220" font-size="15" fill="#c9d6e0">reagents, batch info</text>
+    <text x="64" y="256" font-size="13" fill="#9bb3c4">SDRF + IDF (MAGE-TAB)</text>
+  </g>
+
+  <!-- FASTQ (ELIXIR mid blue) -->
+  <g>
+    <rect x="325" y="120" width="250" height="170" rx="16" fill="#037eab"/>
+    <text x="349" y="166" font-size="22" font-weight="700" fill="#ffffff">2 · Raw FASTQ</text>
+    <text x="349" y="198" font-size="15" fill="#d3ecf5">Sequence reads as they</text>
+    <text x="349" y="220" font-size="15" fill="#d3ecf5">came off the sequencer</text>
+    <text x="349" y="256" font-size="13" fill="#a8d6e7">the unprocessed evidence</text>
+  </g>
+
+  <!-- Count matrix (ELIXIR orange) -->
+  <g>
+    <rect x="610" y="120" width="250" height="170" rx="16" fill="#f47d20"/>
+    <text x="634" y="166" font-size="22" font-weight="700" fill="#ffffff">3 · Count matrix</text>
+    <text x="634" y="198" font-size="15" fill="#fde4cd">Genes × samples,</text>
+    <text x="634" y="220" font-size="15" fill="#fde4cd">the processed result</text>
+    <text x="634" y="256" font-size="13" fill="#fbd0ab">aligned &amp; counted</text>
+  </g>
+
+  <!-- arrows -->
+  <text x="300" y="215" font-size="26" fill="#023452" font-weight="700">→</text>
+  <text x="585" y="215" font-size="26" fill="#023452" font-weight="700">→</text>
+</svg>

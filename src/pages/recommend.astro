@@ -1,0 +1,652 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Serialise modules + their tags as JSON for the client-side scorer.
+const modules = await getCollection('modules');
+const moduleData = modules.map((m) => ({
+  id: m.id,
+  title: m.data.title,
+  summary: m.data.summary,
+  number: m.data.number,
+  isSideRoom: m.data.isSideRoom,
+  short: m.data.estimatedMinutes.short,
+  long: m.data.estimatedMinutes.long,
+  playbook: m.data.playbook,
+  audience: m.data.audience,
+  scenario: m.data.scenario,
+  dataType: m.data.dataType,
+  intent: m.data.intent,
+}));
+---
+<BaseLayout title="Build a recommended journey" description="Answer five questions and the playbook suggests a tailored path">
+  <div class="rec-eyebrow">five questions →</div>
+  <h1 class="rec-title">Build <em>your</em> session</h1>
+  <p class="rec-sub">
+    Tell us about the people you're facilitating and what you need to achieve.
+    The kit surfaces activities from both playbooks — and tells you <strong>why</strong> each one fits,
+    so you can assemble a session you're confident to run.
+  </p>
+
+  <div id="wizard">
+    <!-- Progress dots -->
+    <div class="progress-dots" id="progress-dots">
+      <span data-step="1"></span>
+      <span data-step="2"></span>
+      <span data-step="3"></span>
+      <span data-step="4"></span>
+      <span data-step="5"></span>
+    </div>
+
+    <!-- Question slides -->
+    <section class="step" data-step="1" data-axis="audience">
+      <h2>1. Who are you supporting?</h2>
+      <p class="muted">Pick the closest match. You'll get to pick more than one in some questions.</p>
+      <div class="choices">
+        <button class="choice" data-value="phd-student">A PhD student / new researcher</button>
+        <button class="choice" data-value="postdoc">A postdoc mid-career</button>
+        <button class="choice" data-value="pi">A PI / group leader</button>
+        <button class="choice" data-value="decision-maker">A decision-maker (head of department, dean)</button>
+        <button class="choice" data-value="rdm-peer">Another RDM professional</button>
+        <button class="choice" data-value="researcher">A generic researcher (any career stage)</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="2" data-axis="scenario" hidden>
+      <h2>2. What's the scenario?</h2>
+      <p class="muted">Pick up to two.</p>
+      <div class="choices" data-multi="2">
+        <button class="choice" data-value="starting-project">They're starting a new project</button>
+        <button class="choice" data-value="mid-project">They're mid-project</button>
+        <button class="choice" data-value="ending-project">A project is ending</button>
+        <button class="choice" data-value="legacy-data">There's legacy/orphan data</button>
+        <button class="choice" data-value="advocating-internally">Need to advocate to leadership/colleagues</button>
+        <button class="choice" data-value="training-team">Training a team</button>
+      </div>
+      <button class="next" disabled>Next →</button>
+    </section>
+
+    <section class="step" data-step="3" data-axis="dataType" hidden>
+      <h2>3. What kind of data?</h2>
+      <p class="muted">Pick the closest match. Choose "Don't know / mixed" if it's general.</p>
+      <div class="choices">
+        <button class="choice" data-value="sequencing">Sequencing (RNA-seq, NGS, etc.)</button>
+        <button class="choice" data-value="proteomics">Proteomics / mass spec</button>
+        <button class="choice" data-value="imaging">Imaging</button>
+        <button class="choice" data-value="spreadsheet">Bespoke data (spreadsheet / custom assay)</button>
+        <button class="choice" data-value="code">Code / analytical pipelines</button>
+        <button class="choice" data-value="mixed">Mixed / don't know yet</button>
+        <button class="choice" data-value="n-a">Not data-specific (general / cultural)</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="4" data-axis="intent" hidden>
+      <h2>4. What do you need the session to do?</h2>
+      <p class="muted">Pick up to two.</p>
+      <div class="choices" data-multi="2">
+        <button class="choice" data-value="how-to">Teach how to do something practical</button>
+        <button class="choice" data-value="motivate">Motivate / shift attitude</button>
+        <button class="choice" data-value="signpost">Signpost to other resources</button>
+        <button class="choice" data-value="self-assess">Let them self-assess where they are</button>
+        <button class="choice" data-value="hands-on-exercise">Hands-on exercise / activity</button>
+      </div>
+      <button class="next" disabled>Next →</button>
+    </section>
+
+    <section class="step" data-step="5" data-axis="time" hidden>
+      <h2>5. How much time do you have?</h2>
+      <p class="muted">Determines whether we surface short recaps or full modules.</p>
+      <div class="choices">
+        <button class="choice" data-value="quick">Under 15 minutes</button>
+        <button class="choice" data-value="session">30–60 minute session</button>
+        <button class="choice" data-value="halfday">Half day</button>
+        <button class="choice" data-value="fullday">Full day</button>
+      </div>
+    </section>
+
+    <section class="results" hidden>
+      <div class="results-eyebrow">your tailored path →</div>
+      <h2 class="results-title">Start here</h2>
+      <div id="primary-result"></div>
+
+      <div class="results-secondary-header" id="secondary-header" hidden>
+        <h3>Then consider</h3>
+        <p class="muted">Supporting modules that fit your scenario, in order of relevance.</p>
+      </div>
+      <div id="secondary-results"></div>
+
+      <div class="results-summary" id="results-summary"></div>
+      <button class="restart">← Start over</button>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .rec-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--coral);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .rec-title { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 0.8rem; }
+  .rec-title em { color: var(--coral); font-style: italic; }
+  .rec-sub { font-size: 1.05rem; color: var(--muted); max-width: 36rem; }
+
+  #wizard { margin-top: 3rem; }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+  }
+  .progress-dots span {
+    width: 36px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .progress-dots span[data-active="true"] { background: var(--coral); }
+  .progress-dots span[data-done="true"] { background: var(--text); }
+
+  .step h2 {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 0.4rem;
+  }
+  .step .muted { margin-bottom: 1.5rem; }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin: 1.5rem 0;
+  }
+  .choice {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    padding: 1.1rem 1.3rem;
+    text-align: left;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.98rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .choice:hover {
+    border-color: var(--text);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--coral);
+  }
+  .choice[data-selected="true"] {
+    background: var(--text);
+    color: white;
+    border-color: var(--text);
+    box-shadow: 3px 3px 0 var(--coral);
+  }
+  .choice[data-selected="true"]::after {
+    content: '✓';
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    color: var(--coral);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+
+  .next {
+    margin-top: 1rem;
+    background: var(--coral);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.6rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    box-shadow: 3px 3px 0 var(--text);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .next:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--text);
+  }
+  .next:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ─── Results — redesigned ─────────────────────────────────────────── */
+  .results-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--coral);
+    margin-bottom: 0.4rem;
+  }
+  .results-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 0 0 1.5rem;
+  }
+
+  /* Primary card — the "this is your top pick" card */
+  .primary-card {
+    background: var(--text);
+    color: white;
+    border-radius: var(--radius);
+    padding: 2rem 2.2rem;
+    box-shadow: 6px 6px 0 var(--coral);
+    margin-bottom: 3rem;
+    position: relative;
+  }
+  .primary-tag {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--lime);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+  .primary-meta { margin-bottom: 0.8rem; }
+  .primary-meta .pb-badge {
+    background: white;
+    color: var(--text);
+    box-shadow: 2px 2px 0 var(--coral);
+  }
+  .primary-meta .pb-badge[data-pb="communicate-advocate"] {
+    background: var(--p2);
+    color: white;
+  }
+  .primary-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    line-height: 1.15;
+    margin: 0 0 0.8rem;
+    color: white;
+  }
+  .primary-summary {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.02rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+  }
+  .primary-reason {
+    background: rgba(255, 255, 255, 0.08);
+    border-left: 3px solid var(--coral);
+    padding: 0.8rem 1rem;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.92rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  .primary-reason strong {
+    color: var(--lime);
+    font-weight: 600;
+  }
+  .primary-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  .primary-time {
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* Secondary header */
+  .results-secondary-header h3 {
+    font-size: 1.6rem;
+    margin: 0 0 0.3rem;
+  }
+  .results-secondary-header .muted {
+    margin-bottom: 1.2rem;
+    font-size: 0.95rem;
+  }
+
+  /* Secondary cards — compact rows */
+  .secondary-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.2rem;
+    align-items: center;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.3rem;
+    margin: 0.7rem 0;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow-card);
+  }
+  .secondary-card:hover {
+    border-color: var(--text);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--coral);
+    color: inherit;
+  }
+  .secondary-band {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--radius-pill);
+    text-align: center;
+    width: max-content;
+  }
+  .secondary-band[data-tone="strong"] {
+    background: var(--text);
+    color: var(--lime);
+  }
+  .secondary-band[data-tone="good"] {
+    background: var(--bg-alt);
+    color: var(--text);
+    border: 1px solid var(--text);
+  }
+  .secondary-band[data-tone="soft"] {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .secondary-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .secondary-title {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.08rem;
+    margin-bottom: 0.3rem;
+    line-height: 1.3;
+  }
+  .secondary-reason {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .secondary-reason strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .secondary-arrow {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--coral);
+    transition: transform 0.15s;
+  }
+  .secondary-card:hover .secondary-arrow { transform: translateX(3px); }
+
+  .results-summary {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .results-summary-mono {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .restart {
+    margin-top: 1.5rem;
+    background: transparent;
+    border: 1.5px solid var(--text);
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-weight: 500;
+    color: var(--text);
+  }
+  .restart:hover { background: var(--text); color: white; }
+
+  @media (max-width: 600px) {
+    .choices { grid-template-columns: 1fr; }
+    .primary-card { padding: 1.5rem; }
+    .secondary-card { grid-template-columns: 1fr; gap: 0.6rem; }
+    .secondary-arrow { display: none; }
+  }
+</style>
+
+<script define:vars={{ moduleData }}>
+  // Tag axes and per-axis scoring weights.
+  // Scenario weighted highest because it's the strongest signal of relevance.
+  const AXIS_WEIGHTS = {
+    audience: 2,
+    scenario: 3,
+    dataType: 1,
+    intent: 2,
+  };
+
+  const answers = { audience: [], scenario: [], dataType: [], intent: [], time: [] };
+  let currentStep = 1;
+  const totalSteps = 5;
+
+  function show(step) {
+    document.querySelectorAll('.step').forEach((s) => {
+      s.hidden = parseInt(s.dataset.step) !== step;
+    });
+    document.querySelector('.results').hidden = true;
+    document.querySelectorAll('#progress-dots span').forEach((dot) => {
+      const dotStep = parseInt(dot.dataset.step);
+      dot.removeAttribute('data-active');
+      dot.removeAttribute('data-done');
+      if (dotStep < step) dot.setAttribute('data-done', 'true');
+      else if (dotStep === step) dot.setAttribute('data-active', 'true');
+    });
+  }
+
+  function advance() {
+    if (currentStep < totalSteps) {
+      currentStep++;
+      show(currentStep);
+    } else {
+      computeAndShowResults();
+    }
+  }
+
+  document.querySelectorAll('.step').forEach((step) => {
+    const axis = step.dataset.axis;
+    const choicesEl = step.querySelector('.choices');
+    const isMulti = choicesEl?.dataset.multi !== undefined;
+    const maxChoices = isMulti ? parseInt(choicesEl.dataset.multi) : 1;
+    const nextBtn = step.querySelector('.next');
+
+    step.querySelectorAll('.choice').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const value = btn.dataset.value;
+        if (isMulti) {
+          const selected = step.querySelectorAll('.choice[data-selected="true"]');
+          if (btn.dataset.selected === 'true') {
+            btn.removeAttribute('data-selected');
+          } else if (selected.length < maxChoices) {
+            btn.setAttribute('data-selected', 'true');
+          }
+          const currentSelected = Array.from(step.querySelectorAll('.choice[data-selected="true"]')).map((b) => b.dataset.value);
+          answers[axis] = currentSelected;
+          if (nextBtn) nextBtn.disabled = currentSelected.length === 0;
+        } else {
+          step.querySelectorAll('.choice').forEach((b) => b.removeAttribute('data-selected'));
+          btn.setAttribute('data-selected', 'true');
+          answers[axis] = [value];
+          setTimeout(advance, 200);
+        }
+      });
+    });
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', advance);
+    }
+  });
+
+  function scoreModule(mod) {
+    let score = 0;
+    const matched = { audience: [], scenario: [], dataType: [], intent: [] };
+    for (const axis of Object.keys(AXIS_WEIGHTS)) {
+      const userTags = answers[axis] || [];
+      const modTags = mod[axis] || [];
+      const overlap = userTags.filter((t) => modTags.includes(t));
+      matched[axis] = overlap;
+      score += overlap.length * AXIS_WEIGHTS[axis];
+    }
+    return { score, matched };
+  }
+
+  // Convert raw score into a qualitative band.
+  // Max possible score with this taxonomy and weights is ~13.
+  function matchBand(score) {
+    if (score >= 7) return { label: 'Strong match', tone: 'strong' };
+    if (score >= 4) return { label: 'Good fit', tone: 'good' };
+    if (score >= 1) return { label: 'Worth considering', tone: 'soft' };
+    return { label: 'Weak match', tone: 'weak' };
+  }
+
+  // Human-readable axis labels and answer labels for the "why this matched" sentence.
+  const AXIS_PHRASES = {
+    audience: { lead: 'who you\'re supporting', conjunction: 'matches' },
+    scenario: { lead: 'the scenario', conjunction: 'fits' },
+    dataType: { lead: 'the data type', conjunction: 'covers' },
+    intent: { lead: 'the format you need', conjunction: 'delivers' },
+  };
+  const VALUE_LABELS = {
+    'phd-student': 'PhD student', 'postdoc': 'postdoc', 'pi': 'PI', 'decision-maker': 'decision-maker',
+    'rdm-peer': 'fellow RDM professional', 'researcher': 'researcher',
+    'starting-project': 'starting a project', 'mid-project': 'mid-project', 'ending-project': 'project ending',
+    'legacy-data': 'legacy data', 'advocating-internally': 'internal advocacy', 'training-team': 'team training',
+    'sequencing': 'sequencing', 'proteomics': 'proteomics', 'imaging': 'imaging',
+    'spreadsheet': 'spreadsheet / bespoke data', 'code': 'code', 'mixed': 'mixed', 'n-a': 'general',
+    'how-to': 'how-to teaching', 'motivate': 'motivation', 'signpost': 'signposting',
+    'self-assess': 'self-assessment', 'hands-on-exercise': 'hands-on exercise',
+  };
+
+  function reasoningSentence(matched) {
+    const parts = [];
+    for (const axis of ['scenario', 'audience', 'intent', 'dataType']) {
+      const overlap = matched[axis];
+      if (overlap && overlap.length > 0) {
+        const labels = overlap.map((v) => VALUE_LABELS[v] || v).join(' + ');
+        parts.push(`<strong>${AXIS_PHRASES[axis].conjunction}</strong> ${AXIS_PHRASES[axis].lead} (${labels})`);
+      }
+    }
+    if (parts.length === 0) return 'Indirect match based on related tags.';
+    return parts.join(' · ');
+  }
+
+  function renderPrimary(item, preferShort) {
+    const { mod, score, matched } = item;
+    const band = matchBand(score);
+    // Fall back to long if user wants short but the module doesn't have one
+    const hasShort = mod.short !== undefined && mod.short !== null;
+    const useShort = preferShort && hasShort;
+    const minutes = useShort ? mod.short : mod.long;
+    const versionLabel = useShort ? 'Quick recap' : (preferShort && !hasShort ? 'Full module (no recap available)' : 'Full module');
+    const pbBadges = mod.playbook.map((p) => `<span class="pb-badge" data-pb="${p}">${p === 'fairification' ? 'P1 · FAIRification' : 'P2 · Advocate'}</span>`).join(' ');
+    return `
+      <div class="primary-card">
+        <div class="primary-tag">★ Your top match · ${band.label}</div>
+        <div class="primary-meta">${pbBadges}</div>
+        <h3 class="primary-title">${mod.title}</h3>
+        <p class="primary-summary">${mod.summary}</p>
+        <div class="primary-reason">${reasoningSentence(matched)}</div>
+        <div class="primary-foot">
+          <span class="primary-time">${versionLabel} · ${minutes} min</span>
+          <a href="/modules/${mod.id}/#${useShort ? 'short' : 'long'}" class="btn btn-primary">Open this module →</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSecondary(item, preferShort) {
+    const { mod, score, matched } = item;
+    const band = matchBand(score);
+    const hasShort = mod.short !== undefined && mod.short !== null;
+    const useShort = preferShort && hasShort;
+    const minutes = useShort ? mod.short : mod.long;
+    const versionLabel = useShort ? 'recap' : 'full';
+    const pb = mod.playbook[0] === 'fairification' ? 'P1' : 'P2';
+    return `
+      <a class="secondary-card" href="/modules/${mod.id}/#${useShort ? 'short' : 'long'}">
+        <div class="secondary-band" data-tone="${band.tone}">${band.label}</div>
+        <div class="secondary-body">
+          <div class="secondary-meta"><span class="pb-badge" data-pb="${mod.playbook[0]}">${pb}</span> <span class="secondary-time">${versionLabel} ${minutes}m</span></div>
+          <strong class="secondary-title">${mod.title}</strong>
+          <div class="secondary-reason">${reasoningSentence(matched)}</div>
+        </div>
+        <div class="secondary-arrow">→</div>
+      </a>
+    `;
+  }
+
+  function computeAndShowResults() {
+    document.querySelectorAll('.step').forEach((s) => (s.hidden = true));
+    document.querySelectorAll('#progress-dots span').forEach((dot) => {
+      dot.removeAttribute('data-active');
+      dot.setAttribute('data-done', 'true');
+    });
+
+    const scored = moduleData.map((mod) => ({ mod, ...scoreModule(mod) }));
+    scored.sort((a, b) => b.score - a.score);
+    const matched = scored.filter((s) => s.score > 0);
+    const preferShort = answers.time[0] === 'quick';
+
+    const primary = document.getElementById('primary-result');
+    const secondary = document.getElementById('secondary-results');
+    const secondaryHeader = document.getElementById('secondary-header');
+    const summary = document.getElementById('results-summary');
+    primary.innerHTML = '';
+    secondary.innerHTML = '';
+
+    if (matched.length === 0) {
+      document.querySelector('.results-title').textContent = 'Nothing matched strongly';
+      primary.innerHTML = `<div class="primary-card">
+        <div class="primary-reason">Your answers didn't strongly overlap with any module. Try changing the scenario or audience, or browse <a href="/modules/">all modules</a>.</div>
+      </div>`;
+      summary.innerHTML = '';
+      return;
+    }
+
+    document.querySelector('.results-title').textContent = 'Start here';
+    primary.innerHTML = renderPrimary(matched[0], preferShort);
+
+    const supporting = matched.slice(1, 5);
+    if (supporting.length > 0) {
+      secondaryHeader.hidden = false;
+      secondary.innerHTML = supporting.map((s) => renderSecondary(s, preferShort)).join('');
+    } else {
+      secondaryHeader.hidden = true;
+    }
+
+    // Footer: total + playbook split
+    const p1 = matched.filter((s) => s.mod.playbook.includes('fairification')).length;
+    const p2 = matched.filter((s) => s.mod.playbook.includes('communicate-advocate')).length;
+    summary.innerHTML = `<span class="results-summary-mono">// ${matched.length} match${matched.length === 1 ? '' : 'es'} · P1 FAIRification: ${p1} · P2 Advocate: ${p2}</span>`;
+    document.querySelector('.results').hidden = false;
+  }
+
+  document.querySelector('.restart').addEventListener('click', () => {
+    Object.keys(answers).forEach((k) => (answers[k] = []));
+    document.querySelectorAll('.choice[data-selected="true"]').forEach((b) => b.removeAttribute('data-selected'));
+    document.querySelectorAll('.next').forEach((b) => (b.disabled = true));
+    currentStep = 1;
+    show(1);
+  });
+
+  show(1);
+</script>
