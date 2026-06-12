@@ -15,9 +15,10 @@ const { Content } = await render(mod);
 
 // Editable decks generated from `session:` by scripts/session-to-decks.mjs
 // (locally + in the deploy Action). Paths mirror the generator's output dir.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 const assetDir = mod.id.startsWith('p2-') ? mod.id : mod.id.slice(0, 2);
-const pptxUrl = `/assets/modules/${assetDir}/${mod.id}.pptx`;
-const docxUrl = `/assets/modules/${assetDir}/${mod.id}-facilitator-guide.docx`;
+const pptxUrl = `${base}assets/modules/${assetDir}/${mod.id}.pptx`;
+const docxUrl = `${base}assets/modules/${assetDir}/${mod.id}-facilitator-guide.docx`;
 
 // Cumulative range like "40–50" → how long the section takes ("10 min").
 const dur = (m?: string) => {
@@ -89,13 +90,13 @@ const useCaseLabels: Record<string, string> = {
           <h2 class="workshop-pack-title">Get the materials</h2>
           <p class="workshop-pack-note muted">
             Every format is generated from the session below — so it's never out of date.
-            <a href="/branding/" style="color: var(--lime);">Branded for your institution →</a>
+            <a href={`${base}branding/`} style="color: var(--lime);">Branded for your institution →</a>
           </p>
         </div>
       </div>
       <div class="pack-downloads">
         {mod.id === '02-public-repos' && (
-          <a class="pack-dl pack-dl-primary" href="/present/02-public-repos/">▶ Present live<span class="pack-dl-ext">in the browser · fills with your institution</span></a>
+          <a class="pack-dl pack-dl-primary" href={`${base}present/02-public-repos/`}>▶ Present live<span class="pack-dl-ext">in the browser · fills with your institution</span></a>
         )}
         <button type="button" class="pack-dl" onclick="window.print()">⬇ PDF handout<span class="pack-dl-ext">print / save as PDF</span></button>
         <a class="pack-dl" href={pptxUrl} download>⬇ Editable slides<span class="pack-dl-ext">.pptx · PowerPoint / Google Slides</span></a>
@@ -121,7 +122,7 @@ const useCaseLabels: Record<string, string> = {
           {step.points.length > 0 && (
             <ul class="fac-points">{step.points.map((pt) => <li set:html={pt}></li>)}</ul>
           )}
-          {step.image && <img class="fac-img" src={step.image.src} alt={step.image.alt} loading="lazy" />}
+          {step.image && <img class="fac-img" src={base + step.image.src.replace(/^\//, '')} alt={step.image.alt} loading="lazy" />}
           {step.exercise && <div class="fac-exercise">✏ {step.exercise}</div>}
         </div>
       ))}
@@ -135,7 +136,7 @@ const useCaseLabels: Record<string, string> = {
   )}
 
   <div class="mod-footer">
-    <a href="/modules/" class="hero-link">← all modules</a>
+    <a href={`${base}modules/`} class="hero-link">← all modules</a>
   </div>
 </BaseLayout>
 

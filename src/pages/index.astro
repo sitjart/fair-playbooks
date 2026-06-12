@@ -8,6 +8,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 const modules = (await getCollection('modules')).sort((a, b) => a.data.number - b.data.number);
 const journeys = await getCollection('journeys');
 const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8')) as any;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 <BaseLayout title="Home" description="A facilitator's kit for RDM professionals running FAIR sessions — choose, adapt, deploy">
   <!-- HERO -->
@@ -24,8 +25,8 @@ const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8
       }
     </p>
     <div class="hero-cta">
-      <a href="/recommend/" class="btn btn-primary">→ Build a session</a>
-      <a href="/branding/" class="hero-link">or set it up for your institution ↗</a>
+      <a href={`${base}recommend/`} class="btn btn-primary">→ Build a session</a>
+      <a href={`${base}branding/`} class="hero-link">or set it up for your institution ↗</a>
     </div>
   </section>
 
@@ -57,10 +58,10 @@ const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8
   <!-- JOURNEYS -->
   <section>
     <h2 class="section-head"><span class="section-num">01</span> Start from a ready-made session</h2>
-    <p class="muted">Tested session plans through the activities. Pick the closest scenario, or <a href="/recommend/">build your own</a>.</p>
+    <p class="muted">Tested session plans through the activities. Pick the closest scenario, or <a href={`${base}recommend/`}>build your own</a>.</p>
     <div class="journey-grid">
       {journeys.map((journey) => (
-        <a href={`/journeys/${journey.id}/`} class="card journey-card">
+        <a href={`${base}journeys/${journey.id}/`} class="card journey-card">
           <strong>{journey.data.title}</strong>
           <div class="muted" style="margin-top:0.4rem;">{journey.data.scenario}</div>
           <div class="journey-cta">explore →</div>
@@ -75,7 +76,7 @@ const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8
     <p class="muted">Facilitator-ready building blocks, translated from established FAIR resources — not reinvented. Each has a quick recap (≤10 min) and a full version; tags show which playbook it serves and what it's for.</p>
     <div class="module-grid">
       {modules.map((mod) => (
-        <a href={`/modules/${mod.id}/`} class="card module-card">
+        <a href={`${base}modules/${mod.id}/`} class="card module-card">
           <div class="module-card-top">
             <div class="module-number">{mod.data.isSideRoom ? '↗' : String(mod.data.number).padStart(2, '0')}</div>
             <div class="module-pbs">
@@ -127,7 +128,7 @@ const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8
           <div class="card yours-step">
             <div class="yours-num">1</div>
             <strong>Fill one short profile</strong>
-            <p class="muted">On the <a href="/branding/">set-up page</a>: your facilitators, repositories, DMP and ethics contacts, local policies.</p>
+            <p class="muted">On the <a href={`${base}branding/`}>set-up page</a>: your facilitators, repositories, DMP and ethics contacts, local policies.</p>
           </div>
           <div class="card yours-step">
             <div class="yours-num">2</div>
@@ -145,7 +146,7 @@ const rpo = yaml.load(fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8
           <p class="muted" style="margin-top:0.4rem;">
             Forking is fine if your institution wants its own copy to change freely. But most teams don't need to —
             and there's a cost: a fork freezes the day you make it, so every new module and fix upstream passes you by,
-            and you take on maintaining a diverging copy. The <a href="/branding/">set-up page</a> avoids all that —
+            and you take on maintaining a diverging copy. The <a href={`${base}branding/`}>set-up page</a> avoids all that —
             your details ride on top of one always-current kit, and new activities appear automatically.
             Fork when you genuinely need deep local changes; use the set-up page for everything else.
           </p>

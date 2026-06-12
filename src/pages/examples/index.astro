@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 <BaseLayout title="Present-mode examples" description="The same Module 02 micro-deck in reveal.js, Marp, and a custom present mode — compare for yourself.">
   <div class="ex-eyebrow">decide by clicking, not arguing →</div>
@@ -11,25 +12,25 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   </p>
 
   <div class="ex-tip card">
-    <strong>Do this first:</strong> open <a href="/branding/">/branding/</a> → <em>Load a demo institution</em>.
+    <strong>Do this first:</strong> open <a href={`${base}branding/`}>/branding/</a> → <em>Load a demo institution</em>.
     Then the "preferred repository" line in every example below fills in with <code>Wessex</code> — live, no editing the deck.
     That's the point: one profile, every artifact.
   </div>
 
   <div class="ex-grid">
-    <a class="card ex-card" href="/examples/reveal/">
+    <a class="card ex-card" href={`${base}examples/reveal/`}>
       <div class="ex-tag">reveal.js</div>
       <strong>Richest live delivery</strong>
       <p>Present from the browser. Press <kbd>S</kbd> for presenter view: current slide, next slide, your script, and a timer on a second screen. Exports PDF. Runs offline.</p>
       <span class="ex-cta">open example →</span>
     </a>
-    <a class="card ex-card" href="/examples/marp/">
+    <a class="card ex-card" href={`${base}examples/marp/`}>
       <div class="ex-tag">Marp</div>
       <strong>One source → web + PowerPoint</strong>
       <p>Authored as plain markdown. Press <kbd>P</kbd> for presenter notes. The same file exports a real <code>.pptx</code> and <code>.pdf</code> — see the buttons below.</p>
       <span class="ex-cta">open example →</span>
     </a>
-    <a class="card ex-card" href="/examples/custom/">
+    <a class="card ex-card" href={`${base}examples/custom/`}>
       <div class="ex-tag">custom (no dependency)</div>
       <strong>Slides + script, side by side</strong>
       <p>Built in this site's own stack — nothing new to install or maintain. Slide and facilitator script always visible together. Print-to-PDF export.</p>
@@ -39,9 +40,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   <div class="ex-exports">
     <span>Marp's export bridge, generated from the <em>same</em> markdown:</span>
-    <a href="/examples/marp/module02.pptx" download class="btn">↓ module02.pptx</a>
-    <a href="/examples/marp/module02.pdf" download class="btn">↓ module02.pdf</a>
-    <a href="/examples/marp/deck.md" download class="btn">↓ source.md</a>
+    <a href={`${base}examples/marp/module02.pptx`} download class="btn">↓ module02.pptx</a>
+    <a href={`${base}examples/marp/module02.pdf`} download class="btn">↓ module02.pdf</a>
+    <a href={`${base}examples/marp/deck.md`} download class="btn">↓ source.md</a>
   </div>
 
   <h2>Honest trade-offs</h2>
@@ -68,7 +69,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     The <strong>custom</strong> option is the no-new-dependency fallback. They're not exclusive — you could author in Marp markdown and present with reveal-style notes — but for one decision, it comes down to <em>in-room polish</em> vs <em>export portability</em>.
   </div>
 
-  <p class="ex-back"><a href="/">← back to the kit</a></p>
+  <p class="ex-back"><a href={base}>← back to the kit</a></p>
 </BaseLayout>
 
 <style>

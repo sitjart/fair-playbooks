@@ -37,6 +37,7 @@ const slides = [
              editing the deck: it's filled because this IS the live kit, not a downloaded copy.`,
   },
 ];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 <!doctype html>
 <html lang="en">
@@ -94,7 +95,7 @@ const slides = [
       <button id="prev">← prev</button>
       <button id="next">next →</button>
       <button onclick="window.print()">⎙ export PDF</button>
-      <a href="/examples/">back to comparison</a>
+      <a href={`${base}examples/`}>back to comparison</a>
     </span>
   </div>
 

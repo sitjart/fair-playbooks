@@ -9,6 +9,9 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+// Normalised to exactly one trailing slash so `${base}path/` is correct whether
+// BASE_URL is "/" (local) or "/fair-playbooks/" (deploy).
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 
 const rpoYaml = fs.readFileSync(path.resolve('./src/data/rpo.yaml'), 'utf8');
 const rpo = yaml.load(rpoYaml) as {
@@ -331,19 +334,19 @@ const rpo = yaml.load(rpoYaml) as {
   <header>
     <div class="header-inner">
       <div class="header-brand">
-        <img src="/assets/branding/elixir-uk-logo-negative.svg" alt="ELIXIR-UK" class="header-logo" id="header-logo-img" />
-        <a href="/" class="header-title">FAIR-in-action ⟶ Playbook</a>
+        <img src={`${base}assets/branding/elixir-uk-logo-negative.svg`} alt="ELIXIR-UK" class="header-logo" id="header-logo-img" />
+        <a href={base} class="header-title">FAIR-in-action ⟶ Playbook</a>
       </div>
       <div class="header-org">
         {rpo.isCustomised ? rpo.name : '// canonical source · ELIXIR-UK RDM Club · commissioned by BioFAIR'}
       </div>
       <nav>
-        <a href="/">Home</a>
-        <a href="/recommend/">Build a session</a>
-        <a href="/modules/">All modules</a>
-        <a href="/journeys/">Suggested journeys</a>
-        <a href="/flashcards/">Flashcards</a>
-        <a href="/parking-lot/">Parking lot</a>
+        <a href={base}>Home</a>
+        <a href={`${base}recommend/`}>Build a session</a>
+        <a href={`${base}modules/`}>All modules</a>
+        <a href={`${base}journeys/`}>Suggested journeys</a>
+        <a href={`${base}flashcards/`}>Flashcards</a>
+        <a href={`${base}parking-lot/`}>Parking lot</a>
       </nav>
     </div>
   </header>
@@ -355,11 +358,11 @@ const rpo = yaml.load(rpoYaml) as {
     <div class="footer-partners">
       <span class="footer-built">Built by the ELIXIR-UK RDM Club · commissioned by BioFAIR</span>
       <div class="footer-logos">
-        <img src="/assets/branding/elixir-uk-logo.svg" alt="ELIXIR-UK" class="footer-logo" />
-        <img src="/assets/branding/BioFAIR-logo.png" alt="BioFAIR" class="footer-logo" />
+        <img src={`${base}assets/branding/elixir-uk-logo.svg`} alt="ELIXIR-UK" class="footer-logo" />
+        <img src={`${base}assets/branding/BioFAIR-logo.png`} alt="BioFAIR" class="footer-logo" />
       </div>
     </div>
-    // one canonical kit · <a href="/branding/">set up your institution</a> to fill local details everywhere — no fork, nothing to keep in sync. New activities appear automatically.
+    // one canonical kit · <a href={`${base}branding/`}>set up your institution</a> to fill local details everywhere — no fork, nothing to keep in sync. New activities appear automatically.
   </footer>
 
   <!-- ─── Runtime institutional profile ───────────────────────────────────
@@ -368,6 +371,7 @@ const rpo = yaml.load(rpoYaml) as {
        browser — NOT in a fork. Every institutional slot hydrates from it at
        runtime, so a new module shipped upstream is instantly usable, already
        wired to accept the profile. Set up once on /branding/. -->
+  <script is:inline define:vars={{ base }}>window.__BASE__ = base;</script>
   <script is:inline>
     (function () {
       var KEY = 'fair:profile';
@@ -404,14 +408,14 @@ const rpo = yaml.load(rpoYaml) as {
           el.dataset.active = 'true';
           el.innerHTML =
             '<span>Viewing as <strong>' + esc(p.name) + '</strong> — local details filled from your institution profile.</span> ' +
-            '<a href="/branding/">edit</a> &middot; <button type="button" id="profile-clear">view canonical</button>';
+            '<a href="' + window.__BASE__ + 'branding/">edit</a> &middot; <button type="button" id="profile-clear">view canonical</button>';
           var c = document.getElementById('profile-clear');
           if (c) c.addEventListener('click', function () { window.FairProfile.clear(); });
         } else {
           el.dataset.active = 'false';
           el.innerHTML =
             "You're viewing the <strong>canonical ELIXIR-UK kit</strong>. " +
-            '<a href="/branding/">Set up your institution &rarr;</a> ' +
+            '<a href="' + window.__BASE__ + 'branding/">Set up your institution &rarr;</a> ' +
             '<span class="indicator-sub">fills local details everywhere — no fork</span>';
         }
         el.hidden = false;
@@ -470,7 +474,7 @@ const rpo = yaml.load(rpoYaml) as {
         if (b.accent) { root.style.setProperty('--lime', b.accent); root.style.setProperty('--p1', b.accent); }
         else { root.style.removeProperty('--lime'); root.style.removeProperty('--p1'); }
         var logo = document.getElementById('header-logo-img');
-        if (logo) logo.src = b.logo || '/assets/branding/elixir-uk-logo-negative.svg';
+        if (logo) logo.src = b.logo || (window.__BASE__ + 'assets/branding/elixir-uk-logo-negative.svg');
       }
 
       function refresh() { renderIndicator(); hydrateHelp(); hydrateSlots(); applyBrand(); }

@@ -425,7 +425,7 @@ const moduleData = modules.map((m) => ({
   }
 </style>
 
-<script define:vars={{ moduleData }}>
+<script define:vars={{ moduleData, base: import.meta.env.BASE_URL.replace(/\/$/, '') + '/' }}>
   // Tag axes and per-axis scoring weights.
   // Scenario weighted highest because it's the strongest signal of relevance.
   const AXIS_WEIGHTS = {
@@ -567,7 +567,7 @@ const moduleData = modules.map((m) => ({
         <div class="primary-reason">${reasoningSentence(matched)}</div>
         <div class="primary-foot">
           <span class="primary-time">${versionLabel} · ${minutes} min</span>
-          <a href="/modules/${mod.id}/#${useShort ? 'short' : 'long'}" class="btn btn-primary">Open this module →</a>
+          <a href="${base}modules/${mod.id}/#${useShort ? 'short' : 'long'}" class="btn btn-primary">Open this module →</a>
         </div>
       </div>
     `;
@@ -582,7 +582,7 @@ const moduleData = modules.map((m) => ({
     const versionLabel = useShort ? 'recap' : 'full';
     const pb = mod.playbook[0] === 'fairification' ? 'P1' : 'P2';
     return `
-      <a class="secondary-card" href="/modules/${mod.id}/#${useShort ? 'short' : 'long'}">
+      <a class="secondary-card" href="${base}modules/${mod.id}/#${useShort ? 'short' : 'long'}">
         <div class="secondary-band" data-tone="${band.tone}">${band.label}</div>
         <div class="secondary-body">
           <div class="secondary-meta"><span class="pb-badge" data-pb="${mod.playbook[0]}">${pb}</span> <span class="secondary-time">${versionLabel} ${minutes}m</span></div>
@@ -616,7 +616,7 @@ const moduleData = modules.map((m) => ({
     if (matched.length === 0) {
       document.querySelector('.results-title').textContent = 'Nothing matched strongly';
       primary.innerHTML = `<div class="primary-card">
-        <div class="primary-reason">Your answers didn't strongly overlap with any module. Try changing the scenario or audience, or browse <a href="/modules/">all modules</a>.</div>
+        <div class="primary-reason">Your answers didn't strongly overlap with any module. Try changing the scenario or audience, or browse <a href="${base}modules/">all modules</a>.</div>
       </div>`;
       summary.innerHTML = '';
       return;

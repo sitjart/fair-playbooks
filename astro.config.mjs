@@ -17,7 +17,11 @@ import { defineConfig } from 'astro/config';
 // ─────────────────────────────────────────────────────────────────────
 
 // https://astro.build/config
+// `base` is set ONLY in the deploy workflow (DEPLOY_BASE=/fair-playbooks) so the
+// GitHub *project* page works at /fair-playbooks/. Locally DEPLOY_BASE is unset →
+// base is "/", so `npm run dev` works at the root. Hand-written links use
+// import.meta.env.BASE_URL, which adapts to whichever base is active.
 export default defineConfig({
-  // site: 'https://<owner>.github.io',
-  // base: '/fair-playbooks',
+  site: 'https://sitjart.github.io',
+  base: process.env.DEPLOY_BASE || '/',
 });

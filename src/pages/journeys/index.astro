@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const journeys = await getCollection('journeys');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 <BaseLayout title="User journeys">
   <h1>User journeys</h1>
@@ -11,7 +12,7 @@ const journeys = await getCollection('journeys');
     right modules in the right order, at the right length.
   </p>
   {journeys.map((journey) => (
-    <a href={`/journeys/${journey.id}/`} class="card" style="display:block; text-decoration:none; color:inherit;">
+    <a href={`${base}journeys/${journey.id}/`} class="card" style="display:block; text-decoration:none; color:inherit;">
       <strong>{journey.data.title}</strong>
       <div class="muted" style="margin-top:0.3rem;">{journey.data.scenario}</div>
       <div class="muted" style="margin-top:0.5rem; font-size:0.85rem;">

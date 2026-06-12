@@ -12,6 +12,7 @@ export async function getStaticPaths() {
 
 const { journey } = Astro.props;
 const { Content: JourneyIntro } = await render(journey);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 
 const steps = await Promise.all(journey.data.path.map(async (step) => {
   const mod = await getEntry('modules', step.module);
@@ -37,7 +38,7 @@ const totalMinutes = steps.reduce((sum, { step, mod }) => {
   <ol class="journey-path">
     {steps.map(({ step, mod }, i) => mod && (
       <li>
-        <a href={`/modules/${mod.id}/#${step.version}`}>
+        <a href={`${base}modules/${mod.id}/#${step.version}`}>
           <span class="badge">Module {mod.data.number}</span>
           <strong style="margin-left:0.6rem;">{mod.data.title}</strong>
         </a>

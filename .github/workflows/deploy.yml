@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22   # Astro 6 requires Node >=22.12 (see package.json engines)
           cache: npm
 
       - name: Install dependencies
@@ -48,13 +48,18 @@ jobs:
       # Drop scripts/reference.pptx / reference.docx to brand the output.
       - name: Generate editable decks
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq pandoc librsvg2-bin python3-pip
-          pip3 install --quiet python-pptx pyyaml
-          node scripts/session-to-decks.mjs       # .docx facilitator guide (pandoc)
-          python3 scripts/session_to_pptx.py      # banded .pptx (python-pptx)
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq pandoc librsvg2-bin python3-venv
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet python-pptx pyyaml
+          node scripts/make-reference-templates.mjs       # branded reference.docx/.pptx
+          node scripts/session-to-decks.mjs               # .docx facilitator guide (Pandoc)
+          .venv/bin/python scripts/session_to_pptx.py     # banded .pptx (python-pptx)
 
       - name: Build Astro site
         run: npm run build
+        env:
+          DEPLOY_BASE: /fair-playbooks   # served under github.io/fair-playbooks/
 
       - name: Upload built site
         uses: actions/upload-pages-artifact@v3

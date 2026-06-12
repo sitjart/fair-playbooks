@@ -10,6 +10,7 @@ const { title, summary, session } = mod.data;
 const steps = session.length;
 const totalMinutes = session.at(-1)?.minutes?.split('–').at(-1);
 const dur = (m) => { const n = (m ?? '').match(/\d+/g); return n && n.length >= 2 ? `${+n[1] - +n[0]} min` : (m ? `${m} min` : ''); };
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 <!doctype html>
 <html lang="en">
@@ -78,7 +79,7 @@ const dur = (m) => { const n = (m ?? '').match(/\d+/g); return n && n.length >= 
 <body>
   <div class="demo-banner">
     Module 02 · live present mode · <b>generated from <code style="color:#fff">session:</code></b> · <b>S</b> script+timer ·
-    <a href="?print-pdf">⬇ PDF</a> · fills from your <a href="/branding/">profile</a> · <a href="/modules/02-public-repos/">← back</a>
+    <a href="?print-pdf">⬇ PDF</a> · fills from your <a href={`${base}branding/`}>profile</a> · <a href={`${base}modules/02-public-repos/`}>← back</a>
   </div>
   <div class="brandmark">ELIXIR-UK RDM Club · Module 02 · FAIRification of RNA-seq</div>
 
@@ -88,7 +89,7 @@ const dur = (m) => { const n = (m ?? '').match(/\d+/g); return n && n.length >= 
       <!-- Title -->
       <section class="title" data-background-color="#023452">
         <div class="title-inner">
-          <img class="title-logo" src="/assets/branding/elixir-uk-logo-negative.svg" alt="ELIXIR-UK" />
+          <img class="title-logo" src={`${base}assets/branding/elixir-uk-logo-negative.svg`} alt="ELIXIR-UK" />
           <div class="eyebrow">workshop · module 02 · {steps} steps{totalMinutes && ` · ~${totalMinutes} min`}</div>
           <h1 set:html={title}></h1>
           <div class="rule"></div>
@@ -110,7 +111,7 @@ const dur = (m) => { const n = (m ?? '').match(/\d+/g); return n && n.length >= 
                   <ul class="slide-points">{step.points.map((pt) => <li set:html={pt}></li>)}</ul>
                 )}
               </div>
-              {step.image && <img class="panel-img" src={step.image.src} alt={step.image.alt} />}
+              {step.image && <img class="panel-img" src={base + step.image.src.replace(/^\//, '')} alt={step.image.alt} />}
             </div>
           </div>
           {step.exercise && <div class="exercise"><b>✏ Exercise:</b> {step.exercise}</div>}

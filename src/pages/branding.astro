@@ -11,6 +11,7 @@ const helpCategories = [
   { key: 'it', label: 'IT / data conversion support' },
   { key: 'training', label: 'RDM training / Carpentries' },
 ];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '') + '/';
 ---
 <BaseLayout title="Set up your institution" description="Fill local details once — they flow into every activity. No fork.">
   <div class="brand-eyebrow">make it yours →</div>
@@ -79,7 +80,7 @@ const helpCategories = [
     </div>
   </div>
 
-  <p class="brand-back"><a href="/">← back to the kit</a> · then open any activity and watch the "local help" boxes fill in.</p>
+  <p class="brand-back"><a href={base}>← back to the kit</a> · then open any activity and watch the "local help" boxes fill in.</p>
 </BaseLayout>
 
 <script is:inline define:vars={{ helpCategories }}>
