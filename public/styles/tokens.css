@@ -1,0 +1,33 @@
+/* ───────────────────────────────────────────────────────────────────────
+   Design tokens — the SINGLE source of truth for the whole site.
+   Linked by BaseLayout (every normal page) AND by the standalone present
+   deck, so a brand change happens in ONE place and can't miss a page.
+
+   Brand: ELIXIR-UK (primary) · BioFAIR (commissioner).
+   ─────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Palette — ELIXIR-UK: navy structure · orange accent · blues */
+  --bg: #ffffff;
+  --bg-alt: #f1f4f6;        /* wash */
+  --text: #023452;          /* navy — text, headings, structure, dark bands */
+  --muted: #4a6577;         /* slate — secondary text */
+  --border: #0234521f;
+  --border-strong: #0234523d;
+  --card: #ffffff;
+
+  --coral: #f47d20;         /* orange — accent / pop / action */
+  --lime: #9bcbdd;          /* light blue — soft highlight */
+  --p1: #037eab;            /* mid blue — Playbook 1 / links */
+  --p2: #f47d20;            /* orange — Playbook 2 */
+
+  /* Type */
+  --font-display: 'Lato', system-ui, sans-serif;
+  --font-body: 'Lato', 'Open Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Spacing rhythm */
+  --radius: 14px;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 0 rgba(2, 52, 82, 0.05), 0 8px 24px -12px rgba(2, 52, 82, 0.16);
+  --shadow-card-lift: 0 1px 0 rgba(2, 52, 82, 0.05), 0 16px 40px -16px rgba(2, 52, 82, 0.24);
+}
