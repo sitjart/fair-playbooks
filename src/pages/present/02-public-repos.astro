@@ -19,57 +19,60 @@ const dur = (m) => { const n = (m ?? '').match(/\d+/g); return n && n.length >= 
   <title>Module 02 — FAIRification of RNA-seq · present mode</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles/tokens.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
   <style>
-    /* tokens come from /styles/tokens.css (shared with the whole site) */
-    .reveal { font-family: var(--font-body); background: var(--bg); color: var(--text); font-size: 30px; }
-    .reveal h1, .reveal h2, .reveal h3 { font-family: var(--font-display); letter-spacing:-0.02em; line-height:1.05; color: var(--text); text-transform:none; }
+    :root {
+      --ink:#023452; --green:#f47d20; --magenta:#037eab;
+      --bg:#ffffff; --bg-alt:#f1f4f6; --muted:#4a6577; --border:#0234521f;
+      --display:'Lato',system-ui,sans-serif; --body:'Lato','Open Sans',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+    }
+    .reveal { font-family: var(--body); background: var(--bg); color: var(--ink); font-size: 30px; }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: var(--display); letter-spacing:-0.02em; line-height:1.05; color: var(--ink); text-transform:none; }
     .reveal .slides section { text-align: left; }
     /* band + body read as one card */
     .slide-card { border-radius: 14px; overflow: hidden; box-shadow: 0 16px 40px -22px rgba(0,0,0,0.45); border: 1px solid var(--border); }
-    .reveal code { font-family: var(--font-mono); background: var(--bg-alt); padding:0.04em 0.32em; border-radius:5px; font-size:0.88em; }
-    .reveal em { color: var(--p1); font-style: italic; }
+    .reveal code { font-family: var(--mono); background: var(--bg-alt); padding:0.04em 0.32em; border-radius:5px; font-size:0.88em; }
+    .reveal em { color: var(--magenta); font-style: italic; }
 
     /* ── Header band + time chip ── */
-    .band { background: var(--text); color:#fff; padding: 0.55em 0.75em; display:flex; align-items:center; justify-content:space-between; gap:0.7em; border-bottom: 4px solid var(--coral); }
-    .band-title { font-family: var(--font-display); font-weight:700; font-size:1.05em; line-height:1.12; color:#fff; }
-    .band-title b { color: var(--coral); font-weight:700; }
-    .chip { background: var(--coral); color:#fff; font-family: var(--font-mono); font-size:0.4em; font-weight:600; padding:0.4em 0.9em; border-radius:999px; white-space:nowrap; letter-spacing:0.04em; }
+    .band { background: var(--ink); color:#fff; padding: 0.55em 0.75em; display:flex; align-items:center; justify-content:space-between; gap:0.7em; border-bottom: 4px solid var(--green); }
+    .band-title { font-family: var(--display); font-weight:700; font-size:1.05em; line-height:1.12; color:#fff; }
+    .band-title b { color: var(--green); font-weight:700; }
+    .chip { background: var(--green); color:#fff; font-family: var(--mono); font-size:0.4em; font-weight:600; padding:0.4em 0.9em; border-radius:999px; white-space:nowrap; letter-spacing:0.04em; }
 
     .card-body { padding: 0.95em 1.15em; background:#fff; }
     .card-body.two { display:grid; grid-template-columns:1.3fr 1fr; gap:1em; align-items:center; }
 
     /* principle pills */
     .pills { display:flex; gap:0.4em; flex-wrap:wrap; margin-bottom:0.6em; }
-    .pill { background:var(--bg-alt); color:var(--text); border:1.5px solid var(--text); font-family:var(--font-display); font-weight:700; font-size:0.48em; padding:0.2em 0.7em; border-radius:999px; }
+    .pill { background:var(--bg-alt); color:var(--ink); border:1.5px solid var(--ink); font-family:var(--display); font-weight:700; font-size:0.48em; padding:0.2em 0.7em; border-radius:999px; }
 
     .slide-points { margin:0; padding-left:1.1em; }
     .slide-points li { font-size:0.62em; line-height:1.6; margin:0.5em 0; }
     .panel-img { width:100%; border-radius:12px; border:1px solid var(--border); display:block; }
 
-    .repo-slot { background:#fdf0e4; color:#a65610; border:1.5px solid var(--coral); padding:0.04em 0.4em; border-radius:6px; font-weight:700; }
+    .repo-slot { background:#fdf0e4; color:#a65610; border:1.5px solid var(--green); padding:0.04em 0.4em; border-radius:6px; font-weight:700; }
 
-    .exercise { margin-top:0.7em; border-left:5px solid var(--p1); background:#e6f2f7; border-radius:0 10px 10px 0; padding:0.5em 0.8em; font-size:0.54em; }
-    .exercise b { color: var(--p1); }
+    .exercise { margin-top:0.7em; border-left:5px solid var(--magenta); background:#e6f2f7; border-radius:0 10px 10px 0; padding:0.5em 0.8em; font-size:0.54em; }
+    .exercise b { color: var(--magenta); }
 
     /* ── Title slide ── */
     .title-inner { padding: 0.4em 0.6em; }
     .title-logo { height:2.1em; margin-bottom:0.6em; display:block; }
-    .eyebrow { font-family:var(--font-mono); font-size:0.4em; text-transform:uppercase; letter-spacing:0.16em; color:var(--coral); font-weight:600; }
+    .eyebrow { font-family:var(--mono); font-size:0.4em; text-transform:uppercase; letter-spacing:0.16em; color:var(--green); font-weight:600; }
     .title-inner h1 { color:#fff; font-size:1.7em; margin:0.2em 0; line-height:1.12; }
-    .rule { height:6px; width:3.2em; border-radius:99px; background:linear-gradient(90deg, var(--coral), var(--p1)); margin:0.5em 0; }
+    .rule { height:6px; width:3.2em; border-radius:99px; background:linear-gradient(90deg, var(--green), var(--magenta)); margin:0.5em 0; }
     .title-sub { color:#aebcc6; font-size:0.6em; max-width:24em; line-height:1.5; }
 
     /* footer + chrome */
-    .brandmark { position:fixed; left:14px; bottom:10px; z-index:30; font:600 11px/1 var(--font-mono); color:var(--muted); letter-spacing:0.04em; }
-    .reveal .progress { color: var(--coral); height:5px; }
-    .reveal .controls { color: var(--coral); }
-    .reveal .slide-number { background: var(--text); font-family: var(--font-mono); }
+    .brandmark { position:fixed; left:14px; bottom:10px; z-index:30; font:600 11px/1 var(--mono); color:var(--muted); letter-spacing:0.04em; }
+    .reveal .progress { color: var(--green); height:5px; }
+    .reveal .controls { color: var(--green); }
+    .reveal .slide-number { background: var(--ink); font-family: var(--mono); }
 
-    .demo-banner { position:fixed; top:0; left:0; right:0; z-index:40; background:var(--text); color:#fff; font:12px/1.5 var(--font-mono); padding:0.35rem 1rem; text-align:center; }
-    .demo-banner b { color:var(--coral); }
-    .demo-banner a { color:var(--coral); }
+    .demo-banner { position:fixed; top:0; left:0; right:0; z-index:40; background:var(--ink); color:#fff; font:12px/1.5 var(--mono); padding:0.35rem 1rem; text-align:center; }
+    .demo-banner b { color:var(--green); }
+    .demo-banner a { color:var(--green); }
   </style>
 </head>
 <body>
