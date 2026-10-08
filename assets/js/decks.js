@@ -164,8 +164,8 @@
         var s = pptx.addSlide();
         s.background = { color: 'FFFFFF' };
         dots(s, false); if (!img) smallDots(s);
-        var textW = img ? 6.4 : 9.4;
-        s.addText(asText(sl.headline, p), { x: 0.7, y: 0.6, w: textW, h: 1.9, fontFace: FONT, fontSize: 38, bold: true, color: b.primary, valign: 'bottom' });
+        var textW = img ? 5.0 : 9.4;
+        s.addText(asText(sl.headline, p), { x: 0.7, y: 0.6, w: textW, h: 1.9, fontFace: FONT, fontSize: img ? 32 : 38, bold: true, color: b.primary, valign: 'bottom' });
         if (sl.lines.length) {
           s.addText(sl.lines.map(function (pt) {
             var t = asText(pt, p);
@@ -178,7 +178,7 @@
             fill: { color: b.primary }, line: { type: 'none' }, color: 'FFFFFF', fontFace: FONT, fontSize: 18, bold: true, valign: 'middle', margin: 12 });
         }
         if (img) {
-          var boxX = 7.4, boxY = 1.0, boxW = 5.4, boxH = 5.2 - (sl.image.credit ? 0.45 : 0);
+          var boxX = 5.9, boxY = 0.5, boxW = 7.0, boxH = 6.3 - (sl.image.credit ? 0.45 : 0);
           var r = Math.min(boxW / img.w, boxH / img.h);
           var w = img.w * r, h = img.h * r;
           s.addImage({ data: img.data, x: boxX + (boxW - w) / 2, y: boxY, w: w, h: h });
