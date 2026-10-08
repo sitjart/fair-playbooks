@@ -1,0 +1,123 @@
+---
+layout: default
+title: Home
+description: A facilitator's kit for RDM professionals running FAIR sessions — choose, adapt, deploy
+---
+{%- comment -%} Ports src/pages/index.astro (canonical, non-forked variant) {%- endcomment -%}
+{%- assign modules = site.modules | sort: 'number' -%}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">For the person running the session — not taking it</div>
+  <h1 class="hero-title">
+    Don't reinvent<br />the <em>workshop</em>
+    <span class="hero-period">.</span>
+  </h1>
+  <p class="hero-sub">
+    You support researchers with FAIR. This is a kit of facilitator-ready activities — translated from RDMkit, the FAIR Cookbook, Galaxy and more — that you <strong>pick from</strong>, <strong>adapt</strong> to your institution, and <strong>run</strong>. Maintained by the ELIXIR-UK RDM Club.
+  </p>
+  <div class="hero-cta">
+    <a href="{{ '/recommend/' | relative_url }}" class="btn btn-primary">→ Build a session</a>
+    <a href="{{ '/branding/' | relative_url }}" class="hero-link">or set it up for your institution</a>
+  </div>
+</section>
+
+<!-- DIFFERENTIATOR -->
+<section class="diff">
+  <div class="diff-banner">
+    <span class="diff-not">This is <strong>not</strong> another FAIR course.</span>
+    <span class="diff-is">It's the layer between FAIR guidance and a session you can run tomorrow.</span>
+  </div>
+  <div class="diff-grid">
+    <div class="diff-pillar">
+      <div class="diff-num">choose</div>
+      <strong>Pick what fits</strong>
+      <p>Answer five questions about your audience, data type and scenario. The kit surfaces the right activities — and tells you why each one matched.</p>
+    </div>
+    <div class="diff-pillar">
+      <div class="diff-num">adapt</div>
+      <strong>Make it yours</strong>
+      <p>~80% ready-to-use; the rest is placeholders for your repositories, policies, contacts and examples. Set it up once and the whole kit speaks for your institution — no fork to keep in sync.</p>
+    </div>
+    <div class="diff-pillar">
+      <div class="diff-num">deploy</div>
+      <strong>Run it locally</strong>
+      <p>Facilitator scripts, slide decks and worked exercises — drawn from established resources, not reinvented. Walk in and deliver.</p>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEYS -->
+<section>
+  <h2 class="section-head"><span class="section-num">01</span> Start from a ready-made session</h2>
+  <p class="muted">Tested session plans through the activities. Pick the closest scenario, or <a href="{{ '/recommend/' | relative_url }}">build your own</a>.</p>
+  <div class="journey-grid">
+    {% for journey in site.journeys %}
+      <a href="{{ journey.url | relative_url }}" class="card journey-card">
+        <strong>{{ journey.title }}</strong>
+        <div class="muted" style="margin-top:0.4rem;">{{ journey.scenario }}</div>
+        <div class="journey-cta">explore →</div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- MODULES -->
+<section>
+  <h2 class="section-head"><span class="section-num">02</span> The activities</h2>
+  <p class="muted">Facilitator-ready building blocks, translated from established FAIR resources — not reinvented. Each has a quick recap (≤10 min) and a full version; tags show which playbook it serves and what it's for.</p>
+  <div class="module-grid">
+    {% for mod in modules %}
+      <a href="{{ mod.url | relative_url }}" class="card module-card">
+        <div class="module-card-top">
+          <div class="module-number">{% if mod.isSideRoom %}↗{% else %}{{ mod.number | prepend: '0' | slice: -2, 2 }}{% endif %}</div>
+          <div class="module-pbs">
+            {% for pb in mod.playbook %}
+              <span class="pb-badge" data-pb="{{ pb }}">{% if pb == 'fairification' %}P1{% else %}P2{% endif %}</span>
+            {% endfor %}
+            {% if mod.isSideRoom %}<span class="badge">side</span>{% endif %}
+          </div>
+        </div>
+        <strong class="module-title">{{ mod.title }}</strong>
+        <p class="module-summary">{{ mod.summary }}</p>
+        <div class="module-meta">
+          {% if mod.estimatedMinutes.short %}<span>recap {{ mod.estimatedMinutes.short }}m</span><span>·</span>{% endif %}
+          <span>full {{ mod.estimatedMinutes.long }}m</span>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- MAKE IT YOURS -->
+<section id="make-it-yours">
+  <h2 class="section-head"><span class="section-num">03</span> Make it yours</h2>
+  <p class="muted">This is the difference between a kit and a course: you fill in <em>your</em> repositories, policies, contacts and examples <strong>once</strong> — and every activity starts speaking for your institution. No fork, so you never fall behind the kit.</p>
+  <div class="yours-grid">
+    <div class="card yours-step">
+      <div class="yours-num">1</div>
+      <strong>Fill one short profile</strong>
+      <p class="muted">On the <a href="{{ '/branding/' | relative_url }}">set-up page</a>: your facilitators, repositories, DMP and ethics contacts, local policies.</p>
+    </div>
+    <div class="card yours-step">
+      <div class="yours-num">2</div>
+      <strong>It flows everywhere</strong>
+      <p class="muted">Every "ask your local RDM team" callout and slide placeholder now names <em>your</em> team — across the whole kit.</p>
+    </div>
+    <div class="card yours-step">
+      <div class="yours-num">3</div>
+      <strong>Always current</strong>
+      <p class="muted">When the Club ships a new activity, you get it instantly — already wired to your profile. Nothing to re-sync.</p>
+    </div>
+  </div>
+  <div class="card local-card" style="border-left: 4px solid var(--coral);">
+    <strong>Prefer to fork it? You can.</strong>
+    <p class="muted" style="margin-top:0.4rem;">
+      Forking is fine if your institution wants its own copy to change freely. But most teams don't need to —
+      and there's a cost: a fork freezes the day you make it, so every new module and fix upstream passes you by,
+      and you take on maintaining a diverging copy. The <a href="{{ '/branding/' | relative_url }}">set-up page</a> avoids all that —
+      your details ride on top of one always-current kit, and new activities appear automatically.
+      Fork when you genuinely need deep local changes; use the set-up page for everything else.
+    </p>
+  </div>
+</section>

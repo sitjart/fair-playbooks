@@ -1,29 +1,10 @@
-# build output
-dist/
-# generated types
-.astro/
-
-# dependencies
-node_modules/
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+/vendor/
+.bundle/
 .DS_Store
-
-# jetbrains setting folder
-.idea/
-
-# python venv for deck generation
+.claude/worktrees/
 scripts/.venv/
-
-.venv/
+node_modules/

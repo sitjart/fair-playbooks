@@ -1,0 +1,270 @@
+{%- comment -%}
+  Web-native present mode for ANY module.
+  The room sees each step's `slide:` block (headline, lines, prompt, image).
+  The facilitator's `script:` and `tip:` go to speaker notes (press S).
+  Minutes never appear on a slide. Steps without a `slide:` block fall back to
+  title / points / exercise. Branding and local contacts come from the
+  institution profile at load time; downloads are built by assets/js/decks.js.
+
+  To add present mode for a module, create present/<module-id>.html:
+    ---
+    layout: present
+    module: <module-id>
+    permalink: /present/<module-id>/
+    ---
+{%- endcomment -%}
+{%- assign mod = site.modules | where: "slug", page.module | first -%}
+{%- assign session = mod.session -%}
+{%- assign base = '/' | relative_url -%}
+{%- assign num = mod.number | prepend: '0' | slice: -2, 2 -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module {{ num }}: {{ mod.title }} · present mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <style>
+    :root {
+      --ink:#023452; --accent:#f47d20; --blue:#037eab; --light:#9bcbdd;
+      --text:#0f2233; --muted:#4a6577; --soft:#fdf0e4; --soft-ink:#8a4a0f;
+      --display:'Lato',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    }
+    .reveal { font-family: var(--display); color: var(--text); font-size: 32px; }
+    .reveal .slides { text-align: left; }
+    .reveal .slides section { height: 100%; }
+    .reveal strong { color: var(--ink); }
+    .reveal em { color: var(--blue); font-style: normal; font-weight: 700; }
+
+    /* ELIXIR-UK circles, cropped by the slide edge */
+    .dots { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .dots i { position: absolute; border-radius: 50%; display: block; }
+    .dots .d1 { width: 15em; height: 15em; right: -5em; top: -6em; background: var(--light); opacity: .35; }
+    .dots .d2 { width: 4.5em; height: 4.5em; right: 7.5em; top: 5.2em; background: var(--accent); }
+    .dots .d3 { width: 1.4em; height: 1.4em; right: 5.4em; top: 10.6em; background: var(--blue); }
+
+    .s-wrap { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0.6em 1.6em 0 1.6em; }
+    .s-grid { display: grid; grid-template-columns: 1fr; gap: 1.2em; align-items: center; }
+    .s-grid.two { grid-template-columns: 1.1fr 1fr; }
+    .s-head { font-family: var(--display); font-weight: 900; font-size: 2.1em; line-height: 1.04; letter-spacing: -0.025em; color: var(--ink); margin: 0 0 0.45em; max-width: 13em; text-transform: none; }
+    .s-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.45em; }
+    .s-lines li { font-size: 0.95em; line-height: 1.3; padding-left: 1.1em; position: relative; }
+    .s-lines li::before { content: ""; position: absolute; left: 0; top: 0.42em; width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--accent); }
+    .s-lines.dense li { font-size: 0.75em; }
+    .s-prompt { display: inline-block; margin: 1em 0 0; background: var(--ink); color: #fff; font-weight: 700; font-size: 0.8em; padding: 0.5em 1em; border-radius: 999px; }
+    .s-fig { margin: 0; }
+    .s-fig img { width: 100%; max-height: 58vh; object-fit: contain; border-radius: 16px; display: block; }
+    .s-fig figcaption { font-size: 0.32em; color: var(--muted); margin-top: 0.5em; line-height: 1.35; }
+
+
+    /* Hands-up poll: the facilitator counts, the bars fill live */
+    .poll { margin-top: 0.7em; }
+    .poll-q { display: inline-block; margin: 0 0 0.5em; background: var(--ink); color: #fff; font-weight: 700; font-size: 0.8em; padding: 0.45em 1em; border-radius: 999px; }
+    .poll-opts { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35em; }
+    .poll-opt { width: 100%; display: grid; grid-template-columns: 1.6em 11em 1fr 2.2em; align-items: center; gap: 0.5em; background: none; border: 0; padding: 0.15em 0; font: inherit; font-size: 0.72em; color: var(--text); text-align: left; cursor: pointer; }
+    .poll-opts.dense .poll-opt { font-size: 0.55em; }
+    .poll-key { width: 1.6em; height: 1.6em; border-radius: 50%; display: grid; place-items: center; background: var(--light); color: var(--ink); font-weight: 900; font-size: 0.8em; }
+    .poll-label { font-weight: 700; line-height: 1.15; }
+    .poll-bar { height: 0.9em; background: #eef3f6; border-radius: 999px; overflow: hidden; }
+    .poll-bar i { display: block; height: 100%; width: 0; background: var(--light); border-radius: 999px; transition: width .35s ease; }
+    .poll-opt.lead .poll-bar i { background: var(--accent); }
+    .poll-opt.lead .poll-key { background: var(--accent); color: #fff; }
+    .poll-count { font-family: var(--mono); font-weight: 600; text-align: right; }
+    .poll-opt:hover .poll-bar { background: #e2ecf1; }
+    .poll-foot { margin: 0.6em 0 0; font-size: 0.4em; color: var(--muted); }
+    .poll-reset { background: none; border: 0; font: inherit; color: var(--blue); text-decoration: underline; cursor: pointer; padding: 0; margin-left: 0.6em; }
+    @media (prefers-reduced-motion: reduce) { .poll-bar i { transition: none; } }
+
+    .repo-slot { background: var(--soft); color: var(--soft-ink); border: 2px solid var(--accent); padding: 0 0.35em; border-radius: 8px; font-weight: 700; }
+
+    /* Title slide */
+    .t-wrap { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 1.6em; }
+    .t-logo { height: 2em; max-width: 8em; object-fit: contain; object-position: left; margin-bottom: 1.2em; display: block; }
+    .t-head { color: #fff; font-weight: 900; font-size: 2.3em; line-height: 1.04; letter-spacing: -0.025em; margin: 0 0 0.4em; max-width: 12em; text-transform: none; }
+    .t-sub { color: rgba(255,255,255,.82); font-size: 0.8em; max-width: 24em; line-height: 1.45; margin: 0; }
+    section.title .dots .d1 { background: var(--blue); opacity: .6; }
+
+    .credits li { font-size: 0.6em; }
+    .credits a { color: var(--blue); }
+
+    .brandmark { position:fixed; left:14px; bottom:10px; z-index:30; font:600 11px/1 var(--mono); color:var(--muted); letter-spacing:0.04em; }
+    .reveal .progress { color: var(--accent); height:5px; }
+    .reveal .controls { color: var(--accent); }
+    .reveal .slide-number { background: var(--ink); font-family: var(--mono); }
+
+    .bar { position:fixed; top:0; left:0; right:0; z-index:40; background:var(--ink); color:#fff; font:12px/1.5 var(--mono); padding:0.35rem 1rem; text-align:center; }
+    .bar a, .bar button { color:var(--accent); }
+    .bar button { background:none; border:0; font:inherit; text-decoration:underline; cursor:pointer; padding:0; }
+    @media print { .bar, .brandmark { display:none; } }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    Module {{ num }} · press S for the script ·
+    <button type="button" data-download="pptx"><span class="pack-dl-label">PowerPoint</span></button> ·
+    <button type="button" data-download="docx"><span class="pack-dl-label">Facilitator guide</span></button> ·
+    <a href="?print-pdf">PDF</a> ·
+    <span id="profile-name">canonical kit</span> (<a href="{{ base }}branding/">change</a>) ·
+    <a href="{{ mod.url | relative_url }}">back to the module</a>
+  </div>
+  <div class="brandmark"><span id="brand-org">ELIXIR-UK RDM Club</span></div>
+
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="title" data-background-color="#023452">
+        <div class="dots"><i class="d1"></i><i class="d2"></i><i class="d3"></i></div>
+        <div class="t-wrap">
+          <img class="t-logo" src="{{ base }}assets/branding/elixir-uk-logo-negative.svg" alt="ELIXIR-UK" />
+          <h1 class="t-head">{{ mod.slide_title | default: mod.title }}</h1>
+          {%- if mod.slide_subtitle %}<p class="t-sub">{{ mod.slide_subtitle }}</p>{% endif %}
+        </div>
+      </section>
+
+      {%- for step in session %}
+      {%- assign sl = step.slide %}
+      {%- assign s_head = sl.headline | default: step.title %}
+      {%- assign s_lines = sl.lines | default: step.points %}
+      {%- assign s_prompt = sl.prompt | default: step.exercise %}
+      {%- assign s_img = sl.image | default: step.image %}
+      {%- assign s_poll = sl.poll %}
+      <section data-background-color="#ffffff">
+        <div class="dots"><i class="d1"></i>{% unless s_img or s_poll %}<i class="d2"></i><i class="d3"></i>{% endunless %}</div>
+        <div class="s-wrap">
+          <div class="s-grid{% if s_img %} two{% endif %}">
+            <div>
+              <h2 class="s-head">{{ s_head }}</h2>
+              {%- if s_lines and s_lines.size > 0 %}
+              <ul class="s-lines{% if s_lines.size > 4 %} dense{% endif %}">{% for pt in s_lines %}<li>{{ pt }}</li>{% endfor %}</ul>
+              {%- endif %}
+              {%- if s_poll %}
+              <div class="poll" data-poll-id="{{ mod.slug }}-{{ forloop.index }}">
+                <p class="poll-q">{{ s_poll.question }}</p>
+                <ol class="poll-opts{% if s_poll.options.size > 4 %} dense{% endif %}">
+                  {%- for opt in s_poll.options %}
+                  <li><button type="button" class="poll-opt" data-i="{{ forloop.index0 }}">
+                    <span class="poll-key">{{ forloop.index }}</span>
+                    <span class="poll-label">{{ opt }}</span>
+                    <span class="poll-bar"><i></i></span>
+                    <span class="poll-count">0</span>
+                  </button></li>
+                  {%- endfor %}
+                </ol>
+                <p class="poll-foot"><span class="poll-total"></span> <button type="button" class="poll-reset">Reset</button></p>
+              </div>
+              {%- elsif s_prompt %}<p class="s-prompt">{{ s_prompt }}</p>{% endif %}
+            </div>
+            {%- if s_img %}
+            <figure class="s-fig">
+              <img src="{{ s_img.src | relative_url }}" alt="{{ s_img.alt | escape }}" onerror="this.closest('figure').hidden=true" />
+              {%- if s_img.credit %}<figcaption>{{ s_img.credit }}</figcaption>{% endif %}
+            </figure>
+            {%- endif %}
+          </div>
+        </div>
+        {%- if step.script or step.tip %}
+        <aside class="notes">{{ step.script }}{% if step.tip %}<br><br><b>Tip:</b> {{ step.tip }}{% endif %}</aside>
+        {%- endif %}
+      </section>
+      {%- endfor %}
+
+      {%- if mod.sources.size > 0 %}
+      <section data-background-color="#ffffff">
+        <div class="s-wrap">
+          <h2 class="s-head">Built from</h2>
+          <ul class="s-lines credits">
+            {%- for s in mod.sources %}
+            <li><a href="{{ s.url }}">{{ s.name }}</a>{% if s.note %}: {{ s.note }}{% endif %}</li>
+            {%- endfor %}
+          </ul>
+        </div>
+      </section>
+      {%- endif %}
+
+    </div>
+  </div>
+
+  {% include module-data.html mod=mod html=mod.content %}
+  <script>window.__BASE__ = "{{ base }}"; if (window.__BASE__.slice(-1) !== '/') window.__BASE__ += '/';</script>
+  <script src="{{ '/assets/js/profile.js' | relative_url }}"></script>
+  <script src="{{ '/assets/js/decks.js' | relative_url }}"></script>
+  <script>
+    // Apply the institution profile to the deck before Reveal paints it.
+    (function () {
+      var p = window.FairProfile && window.FairProfile.get();
+      if (!p) return;
+      var b = p.brand || {}, root = document.documentElement;
+      if (b.primary) {
+        root.style.setProperty('--ink', b.primary);
+        document.querySelectorAll('section.title').forEach(function (s) { s.setAttribute('data-background-color', b.primary); });
+      }
+      if (b.accent) root.style.setProperty('--accent', b.accent);
+      if (b.logo) document.querySelectorAll('.t-logo').forEach(function (img) { img.src = b.logo; img.alt = p.name || ''; });
+      if (p.name) {
+        document.getElementById('profile-name').textContent = 'branded for ' + p.name;
+        document.getElementById('brand-org').textContent = p.name;
+      }
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+  <script>
+    window.Reveal.initialize({ hash: true, center: false, width: 1280, height: 720, margin: 0, slideNumber: 'c/t', transition: 'fade', plugins: [ window.RevealNotes ] });
+    if (/print-pdf/gi.test(window.location.search)) {
+      window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 900); });
+    }
+  </script>
+  <script>
+    // Hands-up poll. Click an option (or press its number) to count a hand;
+    // right-click or Shift to take one away. Counts stay in this browser until Reset.
+    (function () {
+      function key(id) { return 'fair:poll:' + id; }
+      function load(id, n) {
+        try { var a = JSON.parse(localStorage.getItem(key(id))); if (Array.isArray(a) && a.length === n) return a; } catch (e) {}
+        var z = []; for (var i = 0; i < n; i++) z.push(0); return z;
+      }
+      function save(id, a) { try { localStorage.setItem(key(id), JSON.stringify(a)); } catch (e) {} }
+      function opts(poll) { return poll.querySelectorAll('.poll-opt'); }
+      function render(poll) {
+        var b = opts(poll), a = load(poll.dataset.pollId, b.length);
+        var max = Math.max.apply(null, a.concat([1])), total = a.reduce(function (x, y) { return x + y; }, 0);
+        b.forEach(function (btn, i) {
+          btn.querySelector('.poll-count').textContent = a[i];
+          btn.querySelector('.poll-bar i').style.width = (a[i] / max * 100) + '%';
+          btn.classList.toggle('lead', a[i] > 0 && a[i] === max);
+        });
+        poll.querySelector('.poll-total').textContent = total
+          ? total + (total === 1 ? ' hand counted.' : ' hands counted.')
+          : 'Ask for hands, then click each option or press its number to count.';
+      }
+      function bump(poll, i, d) {
+        var a = load(poll.dataset.pollId, opts(poll).length);
+        if (i < 0 || i >= a.length) return;
+        a[i] = Math.max(0, a[i] + d); save(poll.dataset.pollId, a); render(poll);
+      }
+      document.querySelectorAll('.poll').forEach(render);
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest('.poll-opt');
+        if (b) { bump(b.closest('.poll'), +b.dataset.i, e.shiftKey || e.altKey ? -1 : 1); return; }
+        var r = e.target.closest('.poll-reset');
+        if (r) { var p = r.closest('.poll'); try { localStorage.removeItem(key(p.dataset.pollId)); } catch (err) {} render(p); }
+      });
+      document.addEventListener('contextmenu', function (e) {
+        var b = e.target.closest('.poll-opt');
+        if (b) { e.preventDefault(); bump(b.closest('.poll'), +b.dataset.i, -1); }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var m = /^(?:Digit|Numpad)([1-9])$/.exec(e.code || '');
+        if (!m || !window.Reveal) return;
+        var cur = window.Reveal.getCurrentSlide(), poll = cur && cur.querySelector('.poll');
+        if (!poll) return;
+        e.preventDefault(); e.stopPropagation();
+        bump(poll, +m[1] - 1, e.shiftKey ? -1 : 1);
+      }, true);
+    })();
+  </script>
+</body>
+</html>

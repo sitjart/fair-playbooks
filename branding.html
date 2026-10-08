@@ -1,0 +1,99 @@
+---
+layout: default
+title: Set up your institution
+description: Fill local details once — they flow into every activity. No fork.
+permalink: /branding/
+extra_js:
+  - /assets/js/branding.js
+---
+{%- comment -%} Ports src/pages/branding.astro {%- endcomment -%}
+<div class="brand-eyebrow">make it yours →</div>
+<h1 class="brand-title">Set up <em>your</em> institution</h1>
+<p class="brand-sub">
+  Fill this in <strong>once</strong>. Your repositories, contacts and policies flow into every
+  activity, slide placeholder and "local help" box across the kit — on <em>this</em> canonical site.
+  Nothing is forked, so when the RDM Club ships a new activity, you get it instantly, already wired
+  to these details.
+</p>
+
+<div class="brand-callout">
+  <strong>Why not just fork the repo?</strong>
+  Because a fork freezes the day you make it — every new module and fix upstream would pass you by.
+  This profile lives in your browser and rides on top of the always-current kit. Export it to share
+  one profile across your whole RDM team.
+</div>
+
+<form id="brand-form" class="brand-form">
+  <fieldset>
+    <legend>Your institution</legend>
+    <label>Institution name <input type="text" name="name" placeholder="University of Wessex" required /></label>
+    <label>Short name <input type="text" name="shortName" placeholder="Wessex" /></label>
+    <label>RDM contact email <input type="email" name="contactEmail" placeholder="rdm@wessex.ac.uk" /></label>
+    <label>RDM team name <input type="text" name="contactTeam" placeholder="Wessex Research Data Service" /></label>
+    <label>Local RDM/FAIR policies URL <input type="url" name="policiesUrl" placeholder="https://wessex.ac.uk/research-data" /></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Brand (optional)</legend>
+    <p class="brand-hint">Recolour the live site and swap the header logo for your institution. (Downloads stay branded via your uploaded reference template.)</p>
+    <div class="brand-colours">
+      <label>Primary colour <input type="text" name="brandPrimary" placeholder="#07A46F" /></label>
+      <label>Accent colour <input type="text" name="brandAccent" placeholder="#D9115A" /></label>
+      <label>Logo (PNG or SVG) <input type="file" id="brand-logo-file" accept="image/png,image/svg+xml,image/jpeg" /></label>
+    </div>
+    <p class="brand-hint" id="brand-logo-status" hidden></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Where researchers get local help</legend>
+    <p class="brand-hint">These replace the generic "ask your local RDM professional" placeholders inside the activities.</p>
+    <div class="help-row" data-cat="repository">
+      <span class="help-label">Institutional repository support</span>
+      <input type="text" data-field="contact" placeholder="Team / contact name" />
+      <input type="url" data-field="url" placeholder="https:// (optional)" />
+    </div>
+    <div class="help-row" data-cat="dmp">
+      <span class="help-label">Data Management Plan advice</span>
+      <input type="text" data-field="contact" placeholder="Team / contact name" />
+      <input type="url" data-field="url" placeholder="https:// (optional)" />
+    </div>
+    <div class="help-row" data-cat="ethics">
+      <span class="help-label">Ethics and legal review</span>
+      <input type="text" data-field="contact" placeholder="Team / contact name" />
+      <input type="url" data-field="url" placeholder="https:// (optional)" />
+    </div>
+    <div class="help-row" data-cat="licensing">
+      <span class="help-label">Licensing advice</span>
+      <input type="text" data-field="contact" placeholder="Team / contact name" />
+      <input type="url" data-field="url" placeholder="https:// (optional)" />
+    </div>
+    <div class="help-row" data-cat="it">
+      <span class="help-label">IT / data conversion support</span>
+      <input type="text" data-field="contact" placeholder="Team / contact name" />
+      <input type="url" data-field="url" placeholder="https:// (optional)" />
+    </div>
+    <div class="help-row" data-cat="training">
+      <span class="help-label">RDM training / Carpentries</span>
+      <input type="text" data-field="contact" placeholder="Team / contact name" />
+      <input type="url" data-field="url" placeholder="https:// (optional)" />
+    </div>
+  </fieldset>
+
+  <div class="brand-actions">
+    <button type="submit" class="btn btn-primary">Save — apply across the kit</button>
+    <button type="button" id="brand-demo" class="btn">Load a demo institution</button>
+    <button type="button" id="brand-clear" class="brand-text-btn">Clear &amp; view canonical</button>
+  </div>
+  <div id="brand-status" class="brand-status" hidden></div>
+</form>
+
+<div class="brand-share">
+  <h2>Share one profile across your team</h2>
+  <p class="muted">Export your profile as a small file and send it to colleagues — they import it instead of re-typing. (This is the lightweight stand-in for a future hosted institution profile.)</p>
+  <div class="brand-actions">
+    <button type="button" id="brand-export" class="btn">↓ Export profile</button>
+    <label class="btn brand-import-label">↑ Import profile<input type="file" id="brand-import" accept="application/json" hidden /></label>
+  </div>
+</div>
+
+<p class="brand-back"><a href="{{ '/' | relative_url }}">← back to the kit</a> · then open any activity and watch the "local help" boxes fill in.</p>

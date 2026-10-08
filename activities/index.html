@@ -1,0 +1,40 @@
+---
+layout: default
+title: "Activities & games"
+description: "Published FAIR games, repackaged so anyone can run them — facilitator run-sheet plus printable handouts."
+---
+
+<header class="mod-hero">
+  <div class="mod-hero-number">🎲</div>
+  <div class="mod-hero-content">
+    <h1 class="mod-hero-title">Activities &amp; games</h1>
+    <p class="mod-hero-summary">Published FAIR games, repackaged so anyone can run them — a facilitator run-sheet plus printable handouts. Translated, not reinvented; every one attributed and CC-BY.</p>
+  </div>
+</header>
+
+<div class="act-grid">
+  {% assign acts = site.activities | sort: 'title' %}
+  {% for a in acts %}
+  <a class="card act-tile" href="{{ a.url | relative_url }}">
+    <span class="pb-badge" data-pb="communicate-advocate">Activity</span>
+    <strong>{{ a.title }}</strong>
+    <p class="muted">{{ a.summary }}</p>
+    <dl class="act-tile-meta">
+      {% if a.barrier %}<div><dt>Cracks</dt><dd>{{ a.barrier }}</dd></div>{% endif %}
+      {% if a.time %}<div><dt>Time</dt><dd>{{ a.time }}</dd></div>{% endif %}
+    </dl>
+    <span class="act-tile-cta">open + print →</span>
+  </a>
+  {% endfor %}
+</div>
+
+<style>
+  .act-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin:1.5rem 0; }
+  a.act-tile { display:flex; flex-direction:column; text-decoration:none; color:inherit; }
+  a.act-tile strong { font-family:var(--font-display); font-size:1.15rem; margin:0.5rem 0; }
+  a.act-tile p { font-size:0.9rem; flex:1; margin:0 0 0.6rem; }
+  .act-tile-meta { display:flex; gap:1.4rem; margin:0.2rem 0 0.9rem; }
+  .act-tile-meta dt { font:600 0.68rem/1 var(--font-mono); text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); }
+  .act-tile-meta dd { margin:0.15rem 0 0; font-size:0.85rem; }
+  .act-tile-cta { font:0.85rem var(--font-mono); color:var(--coral); margin-top:auto; }
+</style>

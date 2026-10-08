@@ -53,7 +53,9 @@
       "Bash(grep -rn -E '\\(href|src\\)=\\(\"|\\\\{`|=`\\)/\\(assets|styles|branding|modules|recommend|journeys|flashcards|parking-lot|present|examples\\)' src/pages)",
       "Bash(grep -rn -E '`/\\(assets|modules|present|journeys|branding|styles\\)' src/pages)",
       "Bash(grep -n 'define:vars\\\\|/modules/${mod.id}\\\\|browse <a href=\"/modules/\"' src/pages/recommend.astro)",
-      "Bash(DEPLOY_BASE=/fair-playbooks npm run build)"
+      "Bash(DEPLOY_BASE=/fair-playbooks npm run build)",
+      "Bash(pandoc planning/contentathon-3-facilitator-pack.md -o planning/contentathon-3-facilitator-pack.docx)",
+      "Bash(pandoc planning/contentathon-3-participant-boards.md -o planning/contentathon-3-participant-boards.docx)"
     ]
   }
 }

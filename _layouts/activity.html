@@ -1,0 +1,80 @@
+---
+layout: default
+---
+{%- comment -%}
+  Activity / game page. Two audiences on one page:
+   • On SCREEN: the at-a-glance card + facilitator run-sheet.
+   • On PRINT (Cmd/Ctrl-P → Save as PDF): ONLY the `.print-sheet` blocks in the
+     body — the handouts/worksheets — each on its own page, no site chrome.
+  Everything a facilitator needs to run a published game, with the printable bits.
+{%- endcomment -%}
+
+<style>
+  /* ── At-a-glance card ── */
+  .act-card { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0.9rem 1.4rem; }
+  .act-card dt { font:600 0.72rem/1 var(--font-mono); text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); margin-bottom:0.25rem; }
+  .act-card dd { margin:0; font-size:0.95rem; }
+  .act-card dd.barrier { font-weight:600; color:var(--text); }
+
+  /* ── Printable sheets: dashed frame on screen, clean on paper ── */
+  .print-sheet { border:1.5px dashed var(--border-strong); border-radius:12px; padding:1.3rem 1.5rem; margin:1.6rem 0; background:#fff; }
+  .print-sheet h3 { margin:0 0 0.4rem; font-family:var(--font-display); }
+  .print-sheet .sheet-kicker { font:600 0.72rem/1 var(--font-mono); text-transform:uppercase; letter-spacing:0.08em; color:var(--coral); margin-bottom:0.4rem; }
+  .print-sheet table { width:100%; border-collapse:collapse; font-size:0.82rem; margin:0.8rem 0; }
+  .print-sheet th, .print-sheet td { border:1px solid var(--border-strong); padding:0.35rem 0.5rem; text-align:left; vertical-align:top; }
+  .print-sheet th { background:var(--bg-alt); font-family:var(--font-display); }
+  .print-hint { font-size:0.8rem; color:var(--muted); }
+
+  @media print {
+    /* Hide all chrome and the screen-only sections */
+    header, footer, nav, .source-banner, #profile-indicator,
+    .mod-hero, .act-card, .act-meta, .sources-strip, .no-print { display:none !important; }
+    /* In the body, hide everything that ISN'T a printable sheet (i.e. the run-sheet) */
+    .activity-body > :not(.print-sheet) { display:none !important; }
+    .print-sheet { border:none !important; padding:0 !important; margin:0 0 1rem !important; page-break-after:always; }
+    .print-sheet:last-child { page-break-after:auto; }
+    main { max-width:none !important; padding:0 !important; }
+    body { background:#fff !important; }
+  }
+</style>
+
+<header class="mod-hero">
+  <div class="mod-hero-number">🎲</div>
+  <div class="mod-hero-content">
+    <div class="mod-hero-badges">
+      <span class="pb-badge" data-pb="communicate-advocate">Playbook 2 · Activity</span>
+    </div>
+    <h1 class="mod-hero-title">{{ page.title }}</h1>
+    <p class="mod-hero-summary">{{ page.summary }}</p>
+  </div>
+</header>
+
+<!-- At-a-glance card -->
+<section class="card act-meta">
+  <dl class="act-card">
+    {% if page.barrier %}<div><dt>Cracks the barrier</dt><dd class="barrier">{{ page.barrier }}</dd></div>{% endif %}
+    {% if page.audience_label %}<div><dt>Audience</dt><dd>{{ page.audience_label }}</dd></div>{% endif %}
+    {% if page.group_size %}<div><dt>Group size</dt><dd>{{ page.group_size }}</dd></div>{% endif %}
+    {% if page.time %}<div><dt>Time</dt><dd>{{ page.time }}</dd></div>{% endif %}
+    {% if page.prep %}<div><dt>Prep</dt><dd>{{ page.prep }}</dd></div>{% endif %}
+    {% if page.materials %}<div><dt>Materials</dt><dd>{{ page.materials }}</dd></div>{% endif %}
+  </dl>
+</section>
+
+<!-- Attribution — translated, not reinvented -->
+{% if page.source %}
+<section class="sources-strip">
+  <span class="sources-eyebrow">Adapted from: translated, not reinvented</span>
+  <p style="margin:0.4rem 0 0;">{{ page.source }}{% if page.source_url %} — <a href="{{ page.source_url }}">{{ page.source_url }}</a>{% endif %} · <strong>{{ page.licence | default: "CC-BY 4.0" }}</strong></p>
+</section>
+{% endif %}
+
+<!-- Print button -->
+<p class="no-print" style="margin:1.4rem 0;">
+  <button type="button" class="btn btn-primary" onclick="window.print()">🖨 Print the handouts</button>
+  <span class="muted" style="margin-left:0.6rem;">The run-sheet is for your screen; printing gives you just the participant handouts &amp; answer key.</span>
+</p>
+
+<div class="activity-body">
+{{ content }}
+</div>

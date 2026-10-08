@@ -1,0 +1,16 @@
+---
+layout: default
+title: All modules
+permalink: /modules/
+---
+{%- comment -%} Ports src/pages/modules/index.astro {%- endcomment -%}
+{%- assign modules = site.modules | sort: 'number' -%}
+<h1>All modules</h1>
+<p class="muted">Five modules covering the FAIR-in-action playbook. Each has a short and long version.</p>
+{% for mod in modules %}
+  <a href="{{ mod.url | relative_url }}" class="card" style="display:block; text-decoration:none; color:inherit;">
+    <span class="badge">Module {{ mod.number }}</span>
+    <strong style="margin-left:0.6rem;">{{ mod.title }}</strong>
+    <div class="muted" style="margin-top:0.3rem;">{{ mod.summary }}</div>
+  </a>
+{% endfor %}

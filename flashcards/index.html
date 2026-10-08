@@ -1,0 +1,37 @@
+---
+layout: default
+title: Flashcards
+description: Pre-workshop and self-paced flashcards for FAIR concepts
+permalink: /flashcards/
+extra_js:
+  - /assets/js/flashcards.js
+---
+{%- comment -%} Ports src/pages/flashcards/index.astro + components/Flashcard.astro {%- endcomment -%}
+{%- assign cards = site.flashcards | sort: 'difficulty' -%}
+<h1>FAIR flashcards</h1>
+<p class="muted">
+  Pre-workshop primers, or self-paced revision. Click reveal, then mark whether you knew it.
+  Your responses save locally in your browser — no account needed.
+</p>
+<p class="muted">Add new cards by dropping a Markdown file into <code>_flashcards/</code>.</p>
+
+{% for card in cards %}
+  <div class="flashcard" data-revealed="false">
+    <div class="flashcard-meta">
+      <span class="badge">{{ card.category }}</span>
+      <span class="difficulty">{% for i in (1..3) %}{% if i <= card.difficulty %}★{% else %}☆{% endif %}{% endfor %}</span>
+    </div>
+    <div class="flashcard-question">
+      <strong>Q:</strong> {{ card.question }}
+    </div>
+    <button class="flashcard-reveal" type="button">Reveal answer</button>
+    <div class="flashcard-answer">
+      <strong>A:</strong>
+      <div class="flashcard-answer-body">{{ card.content | markdownify }}</div>
+    </div>
+    <div class="flashcard-feedback">
+      <button data-feedback="got-it" type="button">I knew this</button>
+      <button data-feedback="didnt-know" type="button">Need to revisit</button>
+    </div>
+  </div>
+{% endfor %}

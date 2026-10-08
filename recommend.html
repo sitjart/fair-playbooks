@@ -1,0 +1,133 @@
+---
+layout: default
+title: Build a recommended journey
+description: Answer five questions and the playbook suggests a tailored path
+permalink: /recommend/
+extra_js:
+  - /assets/js/recommend.js
+---
+{%- comment -%}
+  Ports src/pages/recommend.astro. Module tag data is emitted as JSON via Liquid
+  (below); the client-side scorer lives in /assets/js/recommend.js.
+{%- endcomment -%}
+
+{%- comment -%} Serialise modules + tags as JSON for the client-side scorer {%- endcomment -%}
+<script id="module-data" type="application/json">
+[
+{%- for m in site.modules -%}
+{
+"id": {{ m.slug | jsonify }},
+"url": {{ m.url | relative_url | jsonify }},
+"title": {{ m.title | jsonify }},
+"summary": {{ m.summary | jsonify }},
+"number": {{ m.number | default: 0 }},
+"isSideRoom": {{ m.isSideRoom | default: false }},
+"short": {% if m.estimatedMinutes.short %}{{ m.estimatedMinutes.short }}{% else %}null{% endif %},
+"long": {{ m.estimatedMinutes.long | default: 0 }},
+"playbook": {% if m.playbook %}{{ m.playbook | jsonify }}{% else %}[]{% endif %},
+"audience": {% if m.audience %}{{ m.audience | jsonify }}{% else %}[]{% endif %},
+"scenario": {% if m.scenario %}{{ m.scenario | jsonify }}{% else %}[]{% endif %},
+"dataType": {% if m.dataType %}{{ m.dataType | jsonify }}{% else %}[]{% endif %},
+"intent": {% if m.intent %}{{ m.intent | jsonify }}{% else %}[]{% endif %}
+}{% unless forloop.last %},{% endunless %}
+{%- endfor -%}
+]
+</script>
+
+<div class="rec-eyebrow">five questions →</div>
+<h1 class="rec-title">Build <em>your</em> session</h1>
+<p class="rec-sub">
+  Tell us about the people you're facilitating and what you need to achieve.
+  The kit surfaces activities from both playbooks — and tells you <strong>why</strong> each one fits,
+  so you can assemble a session you're confident to run.
+</p>
+
+<div id="wizard">
+  <div class="progress-dots" id="progress-dots">
+    <span data-step="1"></span>
+    <span data-step="2"></span>
+    <span data-step="3"></span>
+    <span data-step="4"></span>
+    <span data-step="5"></span>
+  </div>
+
+  <section class="step" data-step="1" data-axis="audience">
+    <h2>1. Who are you supporting?</h2>
+    <p class="muted">Pick the closest match. You'll get to pick more than one in some questions.</p>
+    <div class="choices">
+      <button class="choice" data-value="phd-student">A PhD student / new researcher</button>
+      <button class="choice" data-value="postdoc">A postdoc mid-career</button>
+      <button class="choice" data-value="pi">A PI / group leader</button>
+      <button class="choice" data-value="decision-maker">A decision-maker (head of department, dean)</button>
+      <button class="choice" data-value="rdm-peer">Another RDM professional</button>
+      <button class="choice" data-value="researcher">A generic researcher (any career stage)</button>
+    </div>
+  </section>
+
+  <section class="step" data-step="2" data-axis="scenario" hidden>
+    <h2>2. What's the scenario?</h2>
+    <p class="muted">Pick up to two.</p>
+    <div class="choices" data-multi="2">
+      <button class="choice" data-value="starting-project">They're starting a new project</button>
+      <button class="choice" data-value="mid-project">They're mid-project</button>
+      <button class="choice" data-value="ending-project">A project is ending</button>
+      <button class="choice" data-value="legacy-data">There's legacy/orphan data</button>
+      <button class="choice" data-value="advocating-internally">Need to advocate to leadership/colleagues</button>
+      <button class="choice" data-value="training-team">Training a team</button>
+    </div>
+    <button class="next" disabled>Next →</button>
+  </section>
+
+  <section class="step" data-step="3" data-axis="dataType" hidden>
+    <h2>3. What kind of data?</h2>
+    <p class="muted">Pick the closest match. Choose "Don't know / mixed" if it's general.</p>
+    <div class="choices">
+      <button class="choice" data-value="sequencing">Sequencing (RNA-seq, NGS, etc.)</button>
+      <button class="choice" data-value="proteomics">Proteomics / mass spec</button>
+      <button class="choice" data-value="imaging">Imaging</button>
+      <button class="choice" data-value="spreadsheet">Bespoke data (spreadsheet / custom assay)</button>
+      <button class="choice" data-value="code">Code / analytical pipelines</button>
+      <button class="choice" data-value="mixed">Mixed / don't know yet</button>
+      <button class="choice" data-value="n-a">Not data-specific (general / cultural)</button>
+    </div>
+  </section>
+
+  <section class="step" data-step="4" data-axis="intent" hidden>
+    <h2>4. What do you need the session to do?</h2>
+    <p class="muted">Pick up to two.</p>
+    <div class="choices" data-multi="2">
+      <button class="choice" data-value="how-to">Teach how to do something practical</button>
+      <button class="choice" data-value="motivate">Motivate / shift attitude</button>
+      <button class="choice" data-value="signpost">Signpost to other resources</button>
+      <button class="choice" data-value="self-assess">Let them self-assess where they are</button>
+      <button class="choice" data-value="hands-on-exercise">Hands-on exercise / activity</button>
+    </div>
+    <button class="next" disabled>Next →</button>
+  </section>
+
+  <section class="step" data-step="5" data-axis="time" hidden>
+    <h2>5. How much time do you have?</h2>
+    <p class="muted">Determines whether we surface short recaps or full modules.</p>
+    <div class="choices">
+      <button class="choice" data-value="quick">Under 15 minutes</button>
+      <button class="choice" data-value="session">30–60 minute session</button>
+      <button class="choice" data-value="halfday">Half day</button>
+      <button class="choice" data-value="fullday">Full day</button>
+    </div>
+  </section>
+
+  <section class="results" hidden>
+    <div class="results-eyebrow">your tailored path →</div>
+    <h2 class="results-title">Start here</h2>
+    <div id="primary-result"></div>
+
+    <div class="results-secondary-header" id="secondary-header" hidden>
+      <h3>Then consider</h3>
+      <p class="muted">Supporting modules that fit your scenario, in order of relevance.</p>
+    </div>
+    <div id="secondary-results"></div>
+
+    <div class="results-summary" id="results-summary"></div>
+    <button class="restart">← Start over</button>
+  </section>
+</div>

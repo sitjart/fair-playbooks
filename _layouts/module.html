@@ -1,0 +1,188 @@
+---
+layout: default
+---
+{%- comment -%}
+  Module page. With a `session:` it renders the facilitator prose around the
+  session (split at <div class="session-slot"></div> in the body), the plan
+  table, every step, and the workshop pack. The .pptx / .docx downloads are
+  built in the browser by assets/js/decks.js from the same data, so they carry
+  the current institution profile. Without a session it renders the prose only.
+{%- endcomment -%}
+
+{%- assign id = page.slug -%}
+<!-- HERO with oversized module number -->
+<header class="mod-hero">
+  <div class="mod-hero-number">
+    {%- if page.isSideRoom -%}↗{%- else -%}{{ page.number | prepend: '0' | slice: -2, 2 }}{%- endif -%}
+  </div>
+  <div class="mod-hero-content">
+    <div class="mod-hero-badges">
+      {% for pb in page.playbook %}
+        <span class="pb-badge" data-pb="{{ pb }}">{% if pb == 'fairification' %}Playbook 1 · FAIRification{% else %}Playbook 2 · Communicate / Advocate{% endif %}</span>
+      {% endfor %}
+      {% if page.isSideRoom %}<span class="badge">side room</span>{% endif %}
+    </div>
+    <h1 class="mod-hero-title">{{ page.title }}</h1>
+    <p class="mod-hero-summary">{{ page.summary }}</p>
+
+    {% if page.useCases and page.useCases.size > 0 %}
+    <div class="use-cases">
+      <span class="use-cases-label">covers:</span>
+      {% for uc in page.useCases %}
+        <span class="use-case-tag">{% case uc %}{% when 'unpublished' %}Unpublished{% when 'published-not-fair' %}Published but not FAIRly{% when 'legacy' %}Legacy data{% else %}{{ uc }}{% endcase %}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</header>
+
+{% if page.drawnFromExistingResources %}
+<div class="card" style="border-left: 4px solid var(--coral);">
+  <strong>Drawn from existing resources.</strong> This module isn't being written
+  fresh by the FAIR-in-action Bridge project — it pulls from established sources
+  (RDMkit, GO FAIR, the original FAIR principles paper). Follow the links in the long version.
+</div>
+{% endif %}
+
+{% if page.sources and page.sources.size > 0 %}
+<section class="sources-strip">
+  <span class="sources-eyebrow">Built from: translated, not reinvented</span>
+  <ul class="sources-list">
+    {% for s in page.sources %}
+      <li>
+        <a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.name }}</a>
+        {% if s.note %}<span class="sources-note">— {{ s.note }}</span>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{%- assign has_session = false -%}
+{%- if page.session and page.session.size > 0 -%}{%- assign has_session = true -%}{%- endif -%}
+{%- assign slot = '<div class="session-slot"></div>' -%}
+{%- assign body_parts = content | split: slot -%}
+{%- assign present_page = site.pages | where: "module", id | first -%}
+
+{% if has_session and body_parts.size > 1 %}
+<article class="prose mod-prose numbered">
+  {{ body_parts[0] }}
+</article>
+{% endif %}
+
+{% if has_session %}
+<section class="workshop-pack">
+  <div class="workshop-pack-header">
+    <div>
+      <div class="workshop-pack-eyebrow">Workshop pack</div>
+      <h2 class="workshop-pack-title">Get the materials</h2>
+      <p class="workshop-pack-note muted">
+        Every format is built from the session below, with your institution's branding and contacts at the moment you download.
+        <a href="{{ '/branding/' | relative_url }}" style="color: var(--lime);">Set up your institution</a>
+      </p>
+    </div>
+  </div>
+  <div class="pack-downloads">
+    {% if present_page %}
+      <a class="pack-dl pack-dl-primary" href="{{ present_page.url | relative_url }}">Present live<span class="pack-dl-ext">in the browser · press S for the script</span></a>
+    {% endif %}
+    <button type="button" class="pack-dl" data-download="pptx"><span class="pack-dl-label">Editable slides</span><span class="pack-dl-ext">.pptx · PowerPoint / Google Slides</span></button>
+    <button type="button" class="pack-dl" data-download="docx"><span class="pack-dl-label">Facilitator guide</span><span class="pack-dl-ext">.docx · Word / Google Docs</span></button>
+    {% if present_page %}
+      <a class="pack-dl" href="{{ present_page.url | relative_url }}?print-pdf">PDF slides<span class="pack-dl-ext">print / save as PDF</span></a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="fac-session" id="run-session">
+  <div class="fac-eyebrow">The session, step by step</div>
+  <h2 class="fac-title">Run this session</h2>
+
+  {%- assign has_short = false -%}
+  {%- for step in page.session -%}{%- if step.short != nil -%}{%- assign has_short = true -%}{%- endif -%}{%- endfor -%}
+  {% if has_short %}
+  <table class="fac-plan">
+    <thead><tr><th>Step</th><th>Full</th><th>Short</th><th>If you need to cut</th></tr></thead>
+    <tbody>
+    {% for step in page.session %}
+      {%- assign parts = step.minutes | split: '–' -%}
+      <tr>
+        <td>{{ forloop.index }}. {{ step.title }}</td>
+        <td>{% if parts.size >= 2 %}{{ parts[1] | plus: 0 | minus: parts[0] }} min{% endif %}</td>
+        <td>{% if step.short == 0 %}take-home{% elsif step.short %}{{ step.short }} min{% endif %}</td>
+        <td{% if step.cut == 'Never cut.' %} class="never"{% endif %}>{{ step.cut }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <div class="fac-track">
+  {% for step in page.session %}
+    {%- assign sl = step.slide -%}
+    {%- assign s_head = sl.headline | default: step.title -%}
+    {%- assign s_lines = sl.lines | default: step.points -%}
+    {%- assign s_prompt = sl.prompt | default: step.exercise -%}
+    {%- assign s_img = sl.image | default: step.image -%}
+    {%- assign s_poll = sl.poll -%}
+    <div class="fac-step">
+      <span class="fac-num">{{ forloop.index }}</span>
+      <div class="fac-card">
+        <div class="fac-step-top">
+          <h3 class="fac-step-title">{{ step.title }}</h3>
+          {%- if step.minutes -%}
+            {%- assign parts = step.minutes | split: '–' -%}
+            {%- if parts.size >= 2 -%}
+              <span class="fac-time">{{ parts[1] | plus: 0 | minus: parts[0] }} min</span>
+            {%- else -%}
+              <span class="fac-time">{{ step.minutes }} min</span>
+            {%- endif -%}
+          {%- endif %}
+        </div>
+        {% if step.script %}
+          <div class="fac-script"><span class="fac-label">Say</span><p>{{ step.script }}</p></div>
+        {% endif %}
+        {% if step.tip %}
+          <div class="fac-script fac-tip"><span class="fac-label">Tip</span><p>{{ step.tip }}</p></div>
+        {% endif %}
+        <div class="fac-slide">
+          <span class="fac-label">On the slide</span>
+          <p class="fac-slide-head">{{ s_head }}</p>
+          {% if s_lines and s_lines.size > 0 %}<ul class="fac-points">{% for pt in s_lines %}<li>{{ pt }}</li>{% endfor %}</ul>{% endif %}
+          {% if s_poll %}
+            <p class="fac-slide-prompt">Hands-up poll: {{ s_poll.question }}</p>
+            <ol class="fac-poll">{% for opt in s_poll.options %}<li>{{ opt }}</li>{% endfor %}</ol>
+          {% elsif s_prompt %}<p class="fac-slide-prompt">{{ s_prompt }}</p>{% endif %}
+          {% if s_img %}
+          <figure class="fac-figure">
+            <img class="fac-img" src="{{ s_img.src | relative_url }}" alt="{{ s_img.alt }}" loading="lazy" onerror="this.closest('figure').hidden=true" />
+            {% if s_img.credit %}<figcaption>{{ s_img.credit }}</figcaption>{% endif %}
+          </figure>
+          {% endif %}
+        </div>
+        {% if step.principles and step.principles.size > 0 %}
+          <div class="fac-principles" title="FAIR principles this step addresses (facilitator reference)">{% for pr in step.principles %}<span class="fac-pill">{{ pr }}</span>{% endfor %}</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+</section>
+
+{% if body_parts.size > 1 %}
+<article class="prose mod-prose numbered">
+  {{ body_parts[1] }}
+</article>
+{% endif %}
+
+{% include module-data.html mod=page html=content %}
+<script src="{{ '/assets/js/decks.js' | relative_url }}"></script>
+{% else %}
+<article class="prose mod-prose">
+  {{ content }}
+</article>
+{% endif %}
+
+<div class="mod-footer">
+  <a href="{{ '/modules/' | relative_url }}" class="hero-link">← all modules</a>
+</div>

@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────────────────
+# FAIR-in-action Playbook — Jekyll site config
+# Migrated from Astro. Uses the ELIXIR Toolkit Theme (ETT) lineage.
+# ─────────────────────────────────────────────────────────────────────────
+
+title: "FAIR-in-action Playbook"
+description: "A facilitator's kit for RDM professionals running FAIR sessions — choose, adapt, deploy. Built by the ELIXIR-UK RDM Club, commissioned by BioFAIR."
+lang: en
+
+# ── Base path handling ───────────────────────────────────────────────────
+# Locally `bundle exec jekyll serve` serves at the root, so leave baseurl ""
+# for local dev. For a GitHub *project* page (github.io/fair-playbooks/), the
+# deploy workflow sets:  JEKYLL_ENV=production and passes  --baseurl /fair-playbooks
+# OR set `baseurl: "/fair-playbooks"` here before deploying.
+# Every internal link uses {{ '...' | relative_url }} so it adapts to baseurl.
+baseurl: ""
+url: "https://sitjart.github.io"
+
+# ── ELIXIR Toolkit Theme (ETT) — lineage, not a hard dependency ──────────
+# ETT is the community-maintained Jekyll theme behind RDMkit, the FAIR Cookbook
+# and the ELIXIR-UK handbook. This site follows ETT's collection/layout model
+# and carries the ELIXIR-UK brand, but does NOT pull ETT as a remote_theme:
+# ETT's own _config.yml declares a private plugin (elixir-toolkit-theme-plugins)
+# that is not published as a gem, so `remote_theme: ELIXIR-Belgium/...` fails to
+# build under stock Jekyll / GitHub Pages. We therefore vendor equivalent
+# layouts/includes locally (self-contained, always builds). See MIGRATION-NOTES.md
+# "Theme strategy" for how to formally adopt ETT internals if desired.
+# remote_theme: ELIXIR-Belgium/elixir-toolkit-theme   # (disabled — see note above)
+
+# ── Collections (was Astro content collections) ──────────────────────────
+collections:
+  modules:
+    output: true
+    permalink: /modules/:name/
+  journeys:
+    output: true
+    permalink: /journeys/:name/
+  activities:
+    output: true
+    permalink: /activities/:name/
+  flashcards:
+    output: false   # rendered as a list on /flashcards/, no standalone pages
+
+# Default layout per collection
+defaults:
+  - scope: { path: "", type: "modules" }
+    values: { layout: "module" }
+  - scope: { path: "", type: "journeys" }
+    values: { layout: "journey" }
+  - scope: { path: "", type: "activities" }
+    values: { layout: "activity" }
+
+# ── Branding (ELIXIR-UK) — surfaced to templates via site.brand ──────────
+brand:
+  org_name: "ELIXIR-UK RDM Club"
+  org_short: "ELIXIR-UK"
+  commissioner: "BioFAIR"
+  # Canonical palette (live recolour at runtime via the institution profile)
+  navy: "#023452"
+  orange: "#F47D20"
+  midblue: "#037EAB"
+  lightblue: "#9bcbdd"
+  slate: "#4A6577"
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Exclude build/scaffolding from output
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - MIGRATION-NOTES.md
+  - vendor
+  - README.md
+  - node_modules
+
+# Markdown
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false

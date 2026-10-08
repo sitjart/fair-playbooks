@@ -1,0 +1,17 @@
+{%- comment -%}
+  The single source every output reads: the module page, present mode and the
+  generated .pptx / .docx (assets/js/decks.js). Pass mod= (the module document)
+  and html= (its rendered body).
+{%- endcomment -%}
+<script type="application/json" id="fair-module">{
+  "id": {{ include.mod.slug | jsonify }},
+  "number": {{ include.mod.number | default: 0 | jsonify }},
+  "title": {{ include.mod.title | jsonify }},
+  "summary": {{ include.mod.summary | jsonify }},
+  "slideTitle": {{ include.mod.slide_title | default: include.mod.title | jsonify }},
+  "slideSubtitle": {{ include.mod.slide_subtitle | jsonify }},
+  "url": {{ include.mod.url | relative_url | jsonify }},
+  "session": {{ include.mod.session | jsonify }},
+  "sources": {{ include.mod.sources | jsonify }},
+  "html": {{ include.html | jsonify }}
+}</script>

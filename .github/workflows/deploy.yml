@@ -1,28 +1,21 @@
-# ─────────────────────────────────────────────────────────────────────
-# Auto-deploys the FAIR playbooks site to GitHub Pages on every push to main.
-#
-# One-time setup after you push this repo to GitHub:
-#   1. Go to: Settings → Pages
-#   2. Under "Build and deployment", set "Source" to "GitHub Actions"
-#   3. (Optional) Add a custom domain in the same settings page
-#
-# That's it. After that, every push to main rebuilds and redeploys
-# automatically. The deployed URL will appear in the Actions tab.
-# ─────────────────────────────────────────────────────────────────────
-
-name: Deploy to GitHub Pages
+# ─────────────────────────────────────────────────────────────────────────
+# GitHub Pages deploy for the Jekyll site. Runs on every push to main.
+# Settings → Pages → Build and deployment → Source must be "GitHub Actions".
+# Builds with the committed Gemfile/Gemfile.lock (Jekyll 4). The previous
+# Astro site is preserved on the `astro-site-archive` branch.
+# ─────────────────────────────────────────────────────────────────────────
+name: Deploy Jekyll site to GitHub Pages
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # lets you trigger a deploy manually from the Actions tab
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Only one deploy at a time; cancel queued runs if a new push arrives.
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -34,37 +27,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          node-version: 22   # Astro 6 requires Node >=22.12 (see package.json engines)
-          cache: npm
+          ruby-version: "3.3"
+          bundler-cache: true   # runs `bundle install` and caches gems
 
-      - name: Install dependencies
-        run: npm ci
+      # OPTIONAL — regenerate the editable .pptx/.docx decks from each module's
+      # `session:` source before building, so downloads ship in the assets.
+      # These are the framework-agnostic build scripts from ../scripts (unchanged
+      # by this migration). Uncomment once the deck outputs are wired to
+      # assets/modules/<id>/ inside this Jekyll site (see MIGRATION-NOTES.md).
+      # - name: Generate editable decks
+      #   run: |
+      #     sudo apt-get update -qq
+      #     sudo apt-get install -y -qq pandoc librsvg2-bin python3-venv
+      #     python3 -m venv .venv
+      #     .venv/bin/pip install --quiet python-pptx pyyaml
+      #     node scripts/make-reference-templates.mjs
+      #     node scripts/session-to-decks.mjs
+      #     .venv/bin/python scripts/session_to_pptx.py
 
-      # Generate editable .pptx (slides) + .docx (facilitator guide) from each
-      # module's `session:` source. pandoc renders them; librsvg rasterises SVGs.
-      # Drop scripts/reference.pptx / reference.docx to brand the output.
-      - name: Generate editable decks
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq pandoc librsvg2-bin python3-venv
-          python3 -m venv .venv
-          .venv/bin/pip install --quiet python-pptx pyyaml
-          node scripts/make-reference-templates.mjs       # branded reference.docx/.pptx
-          node scripts/session-to-decks.mjs               # .docx facilitator guide (Pandoc)
-          .venv/bin/python scripts/session_to_pptx.py     # banded .pptx (python-pptx)
-
-      - name: Build Astro site
-        run: npm run build
+      - name: Build with Jekyll
+        # baseurl "/fair-playbooks" makes the GitHub *project* page work at
+        # github.io/fair-playbooks/. Drop --baseurl (or set it to "") if you
+        # serve from a custom domain / user page at the root.
+        run: bundle exec jekyll build --baseurl "/fair-playbooks"
         env:
-          DEPLOY_BASE: /fair-playbooks   # served under github.io/fair-playbooks/
+          JEKYLL_ENV: production
 
-      - name: Upload built site
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./_site
 
   deploy:
     needs: build

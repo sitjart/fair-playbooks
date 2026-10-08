@@ -1,0 +1,56 @@
+---
+layout: default
+---
+{%- comment -%}
+  Journey page — ports src/pages/journeys/[...slug].astro.
+  Resolves each path step's module by slug, computes total minutes, renders
+  the ordered path. Body markdown is the journey intro.
+{%- endcomment -%}
+
+<h1>{{ page.title }}</h1>
+<p class="muted">For: {{ page.audience }}</p>
+<div class="card">
+  <strong>Scenario:</strong> {{ page.scenario }}
+</div>
+<article style="margin: 1.5rem 0;">
+  {{ content }}
+</article>
+
+{%- comment -%} Compute total minutes across the path.
+  NOTE: `where: 'slug', ...` is unreliable against Jekyll's derived `slug`
+  attribute, so we resolve each module by a manual slug comparison. {%- endcomment -%}
+{%- assign total = 0 -%}
+{%- for step in page.journey_path -%}
+  {%- assign mod = nil -%}
+  {%- for m in site.modules -%}
+    {%- if m.slug == step.module -%}{%- assign mod = m -%}{%- break -%}{%- endif -%}
+  {%- endfor -%}
+  {%- if mod -%}
+    {%- if step.version == 'short' -%}
+      {%- assign total = total | plus: mod.estimatedMinutes.short -%}
+    {%- else -%}
+      {%- assign total = total | plus: mod.estimatedMinutes.long -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<h2>The path ({{ total }} min total)</h2>
+<ol class="journey-path">
+  {% for step in page.journey_path %}
+    {%- assign mod = nil -%}
+    {%- for m in site.modules -%}
+      {%- if m.slug == step.module -%}{%- assign mod = m -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+    {% if mod %}
+      <li>
+        <a href="{{ mod.url | relative_url }}#{{ step.version }}">
+          <span class="badge">Module {{ mod.number }}</span>
+          <strong style="margin-left:0.6rem;">{{ mod.title }}</strong>
+        </a>
+        <div class="muted" style="margin-top:0.3rem;">
+          {% if step.version == 'short' %}Quick recap · {{ mod.estimatedMinutes.short }} min{% else %}Full module · {{ mod.estimatedMinutes.long }} min{% endif %}
+        </div>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ol>

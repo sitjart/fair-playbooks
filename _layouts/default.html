@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'en' }}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% if page.title %}{{ page.title }} — {% endif %}FAIR-in-action Playbook · {{ site.brand.org_short }}</title>
+  {% if page.description %}<meta name="description" content="{{ page.description }}" />{% endif %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}?v={{ site.time | date: '%s' }}" />
+  {% seo %}
+</head>
+<body>
+  {% include header.html %}
+  <div id="profile-indicator" class="source-banner" data-active="false" hidden></div>
+  <main>
+    {{ content }}
+  </main>
+  {% include footer.html %}
+
+  <!-- ─── Runtime institutional profile ───────────────────────────────────
+       The whole kit is canonical and central. An institution's local details
+       live in a small browser profile — NOT a fork. Every institutional slot
+       hydrates from it at runtime. Set up once on /branding/. -->
+  <script>window.__BASE__ = "{{ '/' | relative_url }}";
+    if (window.__BASE__.slice(-1) !== '/') window.__BASE__ += '/';</script>
+  <script src="{{ '/assets/js/profile.js' | relative_url }}"></script>
+  {% if page.extra_js %}{% for js in page.extra_js %}<script src="{{ js | relative_url }}"></script>{% endfor %}{% endif %}
+</body>
+</html>

@@ -1,0 +1,20 @@
+---
+layout: default
+title: User journeys
+permalink: /journeys/
+---
+{%- comment -%} Ports src/pages/journeys/index.astro {%- endcomment -%}
+<h1>User journeys</h1>
+<p class="muted">
+  Pre-built paths through the modules, designed for common scenarios. Each journey picks the
+  right modules in the right order, at the right length.
+</p>
+{% for journey in site.journeys %}
+  <a href="{{ journey.url | relative_url }}" class="card" style="display:block; text-decoration:none; color:inherit;">
+    <strong>{{ journey.title }}</strong>
+    <div class="muted" style="margin-top:0.3rem;">{{ journey.scenario }}</div>
+    <div class="muted" style="margin-top:0.5rem; font-size:0.85rem;">
+      For: {{ journey.audience }} · {{ journey.journey_path.size }} modules
+    </div>
+  </a>
+{% endfor %}
