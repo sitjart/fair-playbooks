@@ -35,12 +35,19 @@ extra_js:
 
   <fieldset>
     <legend>Brand (optional)</legend>
-    <p class="brand-hint">Recolour the live site and swap the header logo for your institution. (Downloads stay branded via your uploaded reference template.)</p>
+    <p class="brand-hint">Recolour the site, the live slides and the downloads, and swap in your logo. Give two colours with different jobs, so text always stays readable.</p>
     <div class="brand-colours">
-      <label>Primary colour <input type="text" name="brandPrimary" placeholder="#07A46F" /></label>
-      <label>Accent colour <input type="text" name="brandAccent" placeholder="#D9115A" /></label>
-      <label>Logo (PNG or SVG) <input type="file" id="brand-logo-file" accept="image/png,image/svg+xml,image/jpeg" /></label>
+      <label for="brandPrimary">Dark colour
+        <span class="brand-role">Backgrounds behind white text, headings and body text. Must be dark enough for white text on top.</span>
+        <span class="brand-pick"><input type="color" id="brandPrimaryPick" aria-label="Pick the dark colour" value="#023452" /><input type="text" id="brandPrimary" name="brandPrimary" placeholder="#023452" /></span>
+      </label>
+      <label for="brandAccent">Accent colour
+        <span class="brand-role">The bright one: circles, buttons and highlights. Never used directly as text on white.</span>
+        <span class="brand-pick"><input type="color" id="brandAccentPick" aria-label="Pick the accent colour" value="#f47d20" /><input type="text" id="brandAccent" name="brandAccent" placeholder="#F47D20" /></span>
+      </label>
+      <label for="brand-logo-file">Logo (PNG or SVG) <input type="file" id="brand-logo-file" accept="image/png,image/svg+xml,image/jpeg" /></label>
     </div>
+    <div class="brand-check" id="brand-check" aria-live="polite"></div>
     <p class="brand-hint" id="brand-logo-status" hidden></p>
   </fieldset>
 

@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (form.elements['brandPrimary']) form.elements['brandPrimary'].value = b.primary || '';
     if (form.elements['brandAccent']) form.elements['brandAccent'].value = b.accent || '';
     logoData = b.logo || null;
+    if (b.primary && document.getElementById('brandPrimaryPick')) try { document.getElementById('brandPrimaryPick').value = b.primary; } catch (e) {}
+    if (b.accent && document.getElementById('brandAccentPick')) try { document.getElementById('brandAccentPick').value = b.accent; } catch (e) {}
+    if (typeof renderCheck === 'function') renderCheck();
     if (logoStatus) {
       logoStatus.hidden = !b.logo;
       if (b.logo) logoStatus.textContent = '✓ Custom logo set for this institution.';
@@ -66,6 +69,32 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function flash(msg) { status.textContent = msg; status.hidden = false; }
+
+  // ── Live accessibility check for the two brand colours ──
+  var check = document.getElementById('brand-check');
+  function sync(textId, pickId) {
+    var t = form.elements[textId], k = document.getElementById(pickId);
+    if (!t || !k) return;
+    k.addEventListener('input', function () { t.value = k.value; renderCheck(); });
+    t.addEventListener('input', function () { if (/^#?[0-9a-f]{6}$/i.test(t.value.trim())) k.value = '#' + t.value.trim().replace('#', ''); renderCheck(); });
+  }
+  function ratio(n) { return n.toFixed(1) + ':1'; }
+  function renderCheck() {
+    if (!check || !window.FairProfile.colours) return;
+    var primary = form.elements['brandPrimary'].value.trim(), accent = form.elements['brandAccent'].value.trim();
+    if (!primary && !accent) { check.innerHTML = ''; return; }
+    var c = window.FairProfile.colours({ brand: { primary: primary, accent: accent } });
+    var whiteOnDark = c.contrast('#ffffff', primary && /^#?[0-9a-f]{6}$/i.test(primary.replace('#','')) ? (primary[0] === '#' ? primary : '#' + primary) : c.dark);
+    var rows = [];
+    rows.push(c.darkAdjusted
+      ? '<li class="warn"><b>Dark colour is too light</b> for white text (' + ratio(whiteOnDark) + ', needs 4.5:1). The site will use a darker shade, <span class="sw" style="background:' + c.dark + '"></span>' + c.dark + '. Choose a darker colour to keep yours exactly.</li>'
+      : '<li class="ok"><b>Dark colour works</b> with white text (' + ratio(c.contrast('#ffffff', c.dark)) + ').</li>');
+    rows.push('<li class="ok"><b>Accent as text</b> on light backgrounds uses <span class="sw" style="background:' + c.accentText + '"></span>' + c.accentText + ' (' + ratio(c.contrast(c.accentText, '#f1f4f6')) + ').' + (c.accentText.toLowerCase() !== c.accent.toLowerCase() ? ' Your accent is too light for text, so a darker shade is used automatically.' : '') + '</li>');
+    rows.push('<li class="ok"><b>Text on the accent</b> is ' + (c.onAccent === '#ffffff' ? 'white' : (c.onAccent === '#000000' ? 'black' : 'your dark colour')) + ' (' + ratio(c.contrast(c.onAccent, c.accent)) + ').</li>');
+    check.innerHTML = '<div class="brand-preview" style="background:' + c.dark + '"><span style="color:#fff">Heading on dark</span> <span class="pv-pill" style="background:' + c.accent + ';color:' + c.onAccent + '">Button</span> <span style="color:' + c.accentOnDark + '">Label</span></div><ul>' + rows.join('') + '</ul>';
+  }
+  sync('brandPrimary', 'brandPrimaryPick');
+  sync('brandAccent', 'brandAccentPick');
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();

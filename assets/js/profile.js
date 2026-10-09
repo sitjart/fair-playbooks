@@ -107,15 +107,71 @@
   window.FairProfile.fillSlots = fillSlots;
   function hydrateSlots() { fillSlots(document); }
 
+  // ── Accessible brand colours ──
+  // The profile holds a DARK colour (brand.primary: backgrounds behind white
+  // text, headings, body text) and an ACCENT (brand.accent: fills and
+  // highlights only). From these we derive every other pairing so nothing
+  // falls below WCAG AA (4.5:1 for text).
+  var CANON = { dark: '#023452', accent: '#f47d20' };
+  function rgb(h) {
+    h = String(h || '').replace('#', '').trim();
+    if (h.length === 3) h = h.replace(/./g, '$&$&');
+    if (!/^[0-9a-f]{6}$/i.test(h)) return null;
+    return [0, 2, 4].map(function (i) { return parseInt(h.slice(i, i + 2), 16); });
+  }
+  function hexOf(c) { return '#' + c.map(function (v) { return ('0' + Math.round(v).toString(16)).slice(-2); }).join(''); }
+  function lum(h) {
+    return rgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); })
+      .reduce(function (a, v, i) { return a + v * [0.2126, 0.7152, 0.0722][i]; }, 0);
+  }
+  function contrast(a, b) { var x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  // Mix towards black (or white) in small steps until the pair reaches `min`
+  function shiftUntil(h, against, min, towards) {
+    var c = rgb(h), t = towards === 'white' ? 255 : 0;
+    for (var i = 0; i <= 20 && contrast(hexOf(c), against) < min; i++) c = c.map(function (v) { return v + (t - v) * 0.1; });
+    return hexOf(c);
+  }
+  function colours(p) {
+    var b = (p && p.brand) || {};
+    var darkIn = rgb(b.primary) ? b.primary : CANON.dark;
+    var accent = rgb(b.accent) ? b.accent : CANON.accent;
+    // Dark must read as text on the palest tinted panel too (#e6f2f7), not just white
+    var dark = shiftUntil(darkIn, '#e6f2f7', 4.5, 'black');
+    var onAccent = contrast(dark, accent) >= 4.5 ? dark : (contrast('#ffffff', accent) >= 4.5 ? '#ffffff'
+      : (contrast('#000000', accent) > contrast('#ffffff', accent) ? '#000000' : '#ffffff'));
+    return {
+      dark: dark,
+      darkAdjusted: dark.toLowerCase() !== hexOf(rgb(darkIn)).toLowerCase(),
+      accent: accent,
+      accentText: shiftUntil(accent, '#f1f4f6', 4.5, 'black'),   // accent used as text on light backgrounds
+      onAccent: onAccent,                                          // text placed on an accent fill
+      inkOnLime: shiftUntil(dark, '#9bcbdd', 4.5, 'black'),
+      limeOnDark: contrast('#9bcbdd', dark) >= 4.5 ? '#9bcbdd' : '#ffffff',
+      accentOnDark: (function () { var t = contrast(accent, dark) >= 4.5 ? accent : shiftUntil(accent, dark, 4.5, 'white'); return contrast(t, dark) >= 4.5 ? t : '#ffffff'; })(),
+      contrast: contrast
+    };
+  }
+  window.FairProfile.colours = colours;
+
   // ── Apply the institution's brand (colours + logo) live, no fork ──
   function applyBrand() {
     var p = window.FairProfile.get();
     var b = (p && p.brand) || {};
     var root = document.documentElement;
-    if (b.primary) { root.style.setProperty('--coral', b.primary); root.style.setProperty('--p2', b.primary); }
-    else { root.style.removeProperty('--coral'); root.style.removeProperty('--p2'); }
-    if (b.accent) { root.style.setProperty('--lime', b.accent); root.style.setProperty('--p1', b.accent); }
-    else { root.style.removeProperty('--lime'); root.style.removeProperty('--p1'); }
+    var vars = ['--text', '--coral', '--p2', '--coral-text', '--on-coral', '--coral-on-dark', '--ink-on-lime', '--lime-on-dark'];
+    if (b.primary || b.accent) {
+      var c = colours(p);
+      root.style.setProperty('--text', c.dark);
+      root.style.setProperty('--coral', c.accent);
+      root.style.setProperty('--p2', c.accent);
+      root.style.setProperty('--coral-text', c.accentText);
+      root.style.setProperty('--on-coral', c.onAccent);
+      root.style.setProperty('--coral-on-dark', c.accentOnDark);
+      root.style.setProperty('--ink-on-lime', c.inkOnLime);
+      root.style.setProperty('--lime-on-dark', c.limeOnDark);
+    } else {
+      vars.forEach(function (v) { root.style.removeProperty(v); });
+    }
     var logo = document.getElementById('header-logo-img');
     if (logo) logo.src = b.logo || (BASE + 'assets/branding/elixir-uk-logo-negative.svg');
   }

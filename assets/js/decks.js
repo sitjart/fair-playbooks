@@ -47,11 +47,17 @@
     if (c.length === 3) c = c.split('').map(function (x) { return x + x; }).join('');
     return /^[0-9a-f]{6}$/i.test(c) ? c.toUpperCase() : null;
   }
+  // Brand colours come from FairProfile.colours(), which guarantees readable
+  // pairings: dark (behind white text), accent (fills), accentText (accent as
+  // text on white), onAccent (text on accent), accentOnDark (accent as text on dark).
   function brand(p) {
     var b = (p && p.brand) || {};
+    var c = window.FairProfile && window.FairProfile.colours ? window.FairProfile.colours(p) : null;
     return {
-      primary: hex(b.primary) || hex(DEFAULT.primary),
-      accent: hex(b.accent) || hex(DEFAULT.accent),
+      primary: hex(c ? c.dark : b.primary) || hex(DEFAULT.primary),
+      accent: hex(c ? c.accent : b.accent) || hex(DEFAULT.accent),
+      accentText: hex(c ? c.accentText : '#a65610'),
+      accentOnDark: hex(c ? c.accentOnDark : DEFAULT.accent),
       logo: b.logo || ''
     };
   }
@@ -154,7 +160,7 @@
       if (d.benefit) {
         s.addShape(pptx.ShapeType.rect, { x: 0.7, y: 5.55, w: 0.07, h: 0.95, fill: { color: b.accent }, line: { type: 'none' } });
         s.addText([
-          { text: "WHAT'S IN IT FOR YOU", options: { fontSize: 11, bold: true, color: b.accent, charSpacing: 2, breakLine: true } },
+          { text: "WHAT'S IN IT FOR YOU", options: { fontSize: 11, bold: true, color: b.accentOnDark, charSpacing: 2, breakLine: true } },
           { text: asText(d.benefit), options: { fontSize: 17, bold: true, color: 'FFFFFF' } }
         ], { x: 0.9, y: 5.5, w: 8.8, h: 1.05, fontFace: FONT, valign: 'top' });
       }
@@ -231,7 +237,7 @@
       return new D.Paragraph(Object.assign({ children: runs, spacing: { after: 120 } }, opts || {}));
     }
     function labelled(label, text) {
-      return para([new D.TextRun({ text: label + ' ', bold: true, color: b.accent }), new D.TextRun({ text: text })]);
+      return para([new D.TextRun({ text: label + ' ', bold: true, color: b.accentText }), new D.TextRun({ text: text })]);
     }
 
     // Inline HTML → runs (bold / italic / code / links / line breaks)
@@ -317,7 +323,7 @@
         var bytes = Uint8Array.from(atob(logo.data.split(',')[1]), function (c) { return c.charCodeAt(0); });
         children.push(new D.Paragraph({ children: [new D.ImageRun({ data: bytes, transformation: { width: Math.round(48 * logo.w / logo.h), height: 48 } })] }));
       }
-      children.push(para([new D.TextRun({ text: 'FACILITATOR GUIDE · MODULE ' + pad2(d.number), bold: true, color: b.accent })]));
+      children.push(para([new D.TextRun({ text: 'FACILITATOR GUIDE · MODULE ' + pad2(d.number), bold: true, color: b.accentText })]));
       children.push(new D.Paragraph({ heading: D.HeadingLevel.TITLE, children: [new D.TextRun({ text: asText(d.title), bold: true, color: b.primary })] }));
       children.push(para([new D.TextRun({ text: asText(d.summary), italics: true })]));
       if (d.benefit) children.push(labelled("What's in it for participants:", asText(d.benefit)));
@@ -350,7 +356,7 @@
           if (st.script) children.push(labelled('Say:', asText(st.script, p)));
           if (st.tip) children.push(labelled('Tip:', asText(st.tip, p)));
           var sl = slideOf(st);
-          children.push(para([new D.TextRun({ text: 'On the slide: ', bold: true, color: b.accent }), new D.TextRun({ text: asText(sl.headline, p), bold: true })]));
+          children.push(para([new D.TextRun({ text: 'On the slide: ', bold: true, color: b.accentText }), new D.TextRun({ text: asText(sl.headline, p), bold: true })]));
           sl.lines.forEach(function (pt) { children.push(para(runs(parse(pt, p)), { bullet: { level: 0 } })); });
           if (sl.prompt) children.push(labelled('Prompt for the room:', asText(sl.prompt, p)));
           if (sl.image && sl.image.credit) children.push(labelled('Image:', asText(sl.image.credit)));

@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
   <style>
     :root {
-      --ink:#023452; --accent:#f47d20; --blue:#037eab; --light:#9bcbdd;
+      --ink:#023452; --accent:#f47d20; --on-accent:#023452; --accent-on-dark:#f47d20; --blue:#026a91; --light:#9bcbdd;
       --text:#0f2233; --muted:#4a6577; --soft:#fdf0e4; --soft-ink:#8a4a0f;
       --display:'Lato',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
     }
@@ -72,7 +72,7 @@
     .poll-bar { height: 0.9em; background: #eef3f6; border-radius: 999px; overflow: hidden; }
     .poll-bar i { display: block; height: 100%; width: 0; background: var(--light); border-radius: 999px; transition: width .35s ease; }
     .poll-opt.lead .poll-bar i { background: var(--accent); }
-    .poll-opt.lead .poll-key { background: var(--accent); color: #fff; }
+    .poll-opt.lead .poll-key { background: var(--accent); color: var(--on-accent); }
     .poll-count { font-family: var(--mono); font-weight: 600; text-align: right; }
     .poll-opt:hover .poll-bar { background: #e2ecf1; }
     .poll-foot { margin: 0.6em 0 0; font-size: 0.4em; color: var(--muted); }
@@ -87,19 +87,19 @@
     .t-head { color: #fff; font-weight: 900; font-size: 2.3em; line-height: 1.04; letter-spacing: -0.025em; margin: 0 0 0.4em; max-width: 12em; text-transform: none; }
     .t-sub { color: rgba(255,255,255,.82); font-size: 0.8em; max-width: 24em; line-height: 1.45; margin: 0; }
     .t-benefit { margin: 1.1em 0 0; max-width: 24em; color: #fff; font-size: 0.68em; line-height: 1.4; border-left: 4px solid var(--accent); padding-left: 0.8em; }
-    .t-benefit span { display: block; font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.2em; }
+    .t-benefit span { display: block; font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-on-dark); margin-bottom: 0.2em; }
     section.title .dots .d1 { background: var(--blue); opacity: .6; }
 
     .credits li { font-size: 0.6em; }
     .credits a { color: var(--blue); }
 
-    .brandmark { position:fixed; left:14px; bottom:10px; z-index:30; font:600 11px/1 var(--mono); color:var(--muted); letter-spacing:0.04em; }
+    .brandmark { position:fixed; left:12px; bottom:8px; z-index:30; font:600 11px/1 var(--mono); color:var(--muted); background:#fff; padding:4px 8px; border-radius:6px; letter-spacing:0.04em; }
     .reveal .progress { color: var(--accent); height:5px; }
     .reveal .controls { color: var(--accent); }
     .reveal .slide-number { background: var(--ink); font-family: var(--mono); }
 
     .bar { position:fixed; top:0; left:0; right:0; z-index:40; background:var(--ink); color:#fff; font:12px/1.5 var(--mono); padding:0.35rem 1rem; text-align:center; }
-    .bar a, .bar button { color:var(--accent); }
+    .bar a, .bar button { color:var(--accent-on-dark); }
     .bar button { background:none; border:0; font:inherit; text-decoration:underline; cursor:pointer; padding:0; }
     @media print { .bar, .brandmark { display:none; } }
   </style>
@@ -201,11 +201,14 @@
       var p = window.FairProfile && window.FairProfile.get();
       if (!p) return;
       var b = p.brand || {}, root = document.documentElement;
-      if (b.primary) {
-        root.style.setProperty('--ink', b.primary);
-        document.querySelectorAll('section.title').forEach(function (s) { s.setAttribute('data-background-color', b.primary); });
+      if (b.primary || b.accent) {
+        var c = window.FairProfile.colours(p);
+        root.style.setProperty('--ink', c.dark);
+        root.style.setProperty('--accent', c.accent);
+        root.style.setProperty('--on-accent', c.onAccent);
+        root.style.setProperty('--accent-on-dark', c.accentOnDark);
+        document.querySelectorAll('section.title').forEach(function (s) { s.setAttribute('data-background-color', c.dark); });
       }
-      if (b.accent) root.style.setProperty('--accent', b.accent);
       if (b.logo) document.querySelectorAll('.t-logo').forEach(function (img) { img.src = b.logo; img.alt = p.name || ''; });
       if (p.name) {
         document.getElementById('profile-name').textContent = 'branded for ' + p.name;
