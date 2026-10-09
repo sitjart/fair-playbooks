@@ -16,6 +16,7 @@ dataType: [mixed]
 intent: [motivate, how-to]
 slide_title: "It's not too late to make your data FAIR"
 slide_subtitle: "What you can still do, from wherever you are"
+benefit: "Leave with one thing you can do this week that makes your data findable, citable and usable by your future self."
 sources:
   - name: "NFDI4BIOIMAGE data management illustrations by Henning Falk (2024)"
     url: "https://doi.org/10.5281/zenodo.14186100"
@@ -81,13 +82,13 @@ session:
     short: 5
     cut: "Never cut."
     principles: ["F1", "F2", "R1.1"]
-    script: "With limited time, the most useful skill is triage: what gives the most FAIRness for the least effort? A few minutes buys a DOI from a generalist repository, keywords, a named licence and a list of what your abbreviations mean. An hour or more buys a domain repository, a community metadata standard, ontology mapping and a full provenance chain."
+    script: "With limited time, the most useful skill is triage: what gives the most FAIRness for the least effort? A few minutes buys a DOI from a generalist repository, keywords, a named licence and a list of what your abbreviations mean. Days of work buy a domain repository, a community metadata standard, ontology mapping and a full provenance chain."
     tip: "This is the core of the session. Protect it even under severe time pressure."
     slide:
-      headline: "Minutes, or hours?"
+      headline: "Minutes, or days?"
       lines:
         - "<strong>Minutes:</strong> a DOI, keywords, a licence, your abbreviations written down"
-        - "<strong>Hours:</strong> a domain repository, a standard, ontology terms, full provenance"
+        - "<strong>Days:</strong> a domain repository, a standard, ontology terms, full provenance"
       prompt: "Start with the minutes"
   - title: "Minimum Viable FAIR"
     minutes: "28–33"

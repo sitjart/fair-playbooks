@@ -150,7 +150,14 @@
       dots(s, true); smallDots(s);
       if (logo) s.addImage({ data: logo.data, x: 0.7, y: 0.7, h: 0.8, w: 0.8 * logo.w / logo.h });
       s.addText(asText(d.slideTitle || d.title), { x: 0.7, y: 2.4, w: 9.4, h: 2.4, fontFace: FONT, fontSize: 44, bold: true, color: 'FFFFFF', valign: 'top' });
-      if (d.slideSubtitle) s.addText(asText(d.slideSubtitle), { x: 0.7, y: 4.9, w: 9, h: 1.4, fontFace: FONT, fontSize: 20, color: 'DDE3E7', valign: 'top' });
+      if (d.slideSubtitle) s.addText(asText(d.slideSubtitle), { x: 0.7, y: 4.75, w: 9, h: 0.7, fontFace: FONT, fontSize: 20, color: 'DDE3E7', valign: 'top' });
+      if (d.benefit) {
+        s.addShape(pptx.ShapeType.rect, { x: 0.7, y: 5.55, w: 0.07, h: 0.95, fill: { color: b.accent }, line: { type: 'none' } });
+        s.addText([
+          { text: "WHAT'S IN IT FOR YOU", options: { fontSize: 11, bold: true, color: b.accent, charSpacing: 2, breakLine: true } },
+          { text: asText(d.benefit), options: { fontSize: 17, bold: true, color: 'FFFFFF' } }
+        ], { x: 0.9, y: 5.5, w: 8.8, h: 1.05, fontFace: FONT, valign: 'top' });
+      }
       footer(s, 'AEBCC6');
 
       // One slide per step (images load first so the order holds)
@@ -313,6 +320,8 @@
       children.push(para([new D.TextRun({ text: 'FACILITATOR GUIDE · MODULE ' + pad2(d.number), bold: true, color: b.accent })]));
       children.push(new D.Paragraph({ heading: D.HeadingLevel.TITLE, children: [new D.TextRun({ text: asText(d.title), bold: true, color: b.primary })] }));
       children.push(para([new D.TextRun({ text: asText(d.summary), italics: true })]));
+      if (d.benefit) children.push(labelled("What's in it for participants:", asText(d.benefit)));
+      if (d.hook) children.push(labelled("Why they'll care:", asText(d.hook)));
       children.push(para([new D.TextRun({ text: 'Prepared for ' + org + '. Generated ' + new Date().toISOString().slice(0, 10) + ' from the live kit' + (d.url ? ' (' + location.origin + d.url + ')' : '') + '.', color: DEFAULT.muted })]));
 
       var body = parse(d.html, p);

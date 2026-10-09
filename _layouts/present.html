@@ -86,6 +86,8 @@
     .t-logo { height: 2em; max-width: 8em; object-fit: contain; object-position: left; margin-bottom: 1.2em; display: block; }
     .t-head { color: #fff; font-weight: 900; font-size: 2.3em; line-height: 1.04; letter-spacing: -0.025em; margin: 0 0 0.4em; max-width: 12em; text-transform: none; }
     .t-sub { color: rgba(255,255,255,.82); font-size: 0.8em; max-width: 24em; line-height: 1.45; margin: 0; }
+    .t-benefit { margin: 1.1em 0 0; max-width: 24em; color: #fff; font-size: 0.68em; line-height: 1.4; border-left: 4px solid var(--accent); padding-left: 0.8em; }
+    .t-benefit span { display: block; font-family: var(--mono); font-size: 0.6em; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.2em; }
     section.title .dots .d1 { background: var(--blue); opacity: .6; }
 
     .credits li { font-size: 0.6em; }
@@ -122,6 +124,7 @@
           <img class="t-logo" src="{{ base }}assets/branding/elixir-uk-logo-negative.svg" alt="ELIXIR-UK" />
           <h1 class="t-head">{{ mod.slide_title | default: mod.title }}</h1>
           {%- if mod.slide_subtitle %}<p class="t-sub">{{ mod.slide_subtitle }}</p>{% endif %}
+          {%- if mod.benefit %}<p class="t-benefit"><span>What's in it for you</span>{{ mod.benefit }}</p>{% endif %}
         </div>
       </section>
 

@@ -24,6 +24,8 @@ layout: default
     </div>
     <h1 class="mod-hero-title">{{ page.title }}</h1>
     <p class="mod-hero-summary">{{ page.summary }}</p>
+    {% if page.benefit %}<p class="mod-hero-benefit"><span>What's in it for participants</span>{{ page.benefit }}</p>{% endif %}
+    {% if page.hook %}<p class="mod-hero-benefit"><span>Why they'll care</span>{{ page.hook }}</p>{% endif %}
 
     {% if page.useCases and page.useCases.size > 0 %}
     <div class="use-cases">
