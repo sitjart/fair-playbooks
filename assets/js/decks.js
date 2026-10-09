@@ -12,13 +12,15 @@
    Libraries (assets/vendor/) load on the first click.
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
-  var BASE = window.__BASE__ || '/';
+  // Read the site's base path at click time: on GitHub Pages it is /fair-playbooks/,
+  // and the page may only set window.__BASE__ after this script has loaded.
+  function base() { var b = window.__BASE__ || '/'; return b.slice(-1) === '/' ? b : b + '/'; }
   var DEFAULT = { primary: '#023452', accent: '#F47D20', second: '#037EAB', ink: '0F2233', muted: '4A6577' };
   // Bundled with the site (MIT licences alongside) so downloads work on poor
   // workshop wifi and don't depend on a CDN.
   var LIBS = {
-    pptx: BASE + 'assets/vendor/pptxgenjs-3.12.0.bundle.js',
-    docx: BASE + 'assets/vendor/docx-8.5.0.umd.js'
+    pptx: 'assets/vendor/pptxgenjs-3.12.0.bundle.js',
+    docx: 'assets/vendor/docx-8.5.0.umd.js'
   };
   var loading = {};
 
@@ -63,7 +65,7 @@
   }
   function orgName(p) { return (p && p.name) || 'ELIXIR-UK RDM Club'; }
   function pad2(n) { return ('0' + (n || 0)).slice(-2); }
-  function assetUrl(src) { return /^(https?:|data:)/.test(src) ? src : BASE + String(src).replace(/^\//, ''); }
+  function assetUrl(src) { return /^(https?:|data:)/.test(src) ? src : base() + String(src).replace(/^\//, ''); }
 
   // Parse an HTML fragment and fill institution slots, using the same logic as the page.
   function parse(html, p) {
@@ -140,7 +142,7 @@
       s.addText(footerText, { x: 0.5, y: 7.0, w: 12.3, h: 0.3, fontFace: FONT, fontSize: 10, color: color || DEFAULT.muted });
     }
 
-    var logoSrc = b.logo || (BASE + 'assets/branding/elixir-uk-logo-negative.svg');
+    var logoSrc = b.logo || (base() + 'assets/branding/elixir-uk-logo-negative.svg');
     function dots(s, onDark) {
       s.addShape(pptx.ShapeType.ellipse, { x: 10.6, y: -1.9, w: 4.4, h: 4.4, fill: { color: onDark ? hex(DEFAULT.second) : '9BCBDD', transparency: onDark ? 40 : 65 }, line: { type: 'none' } });
     }
@@ -317,7 +319,7 @@
       return out;
     }
 
-    var logoSrc = b.logo || (BASE + 'assets/branding/elixir-uk-logo.svg');
+    var logoSrc = b.logo || (base() + 'assets/branding/elixir-uk-logo.svg');
     return toPng(logoSrc).then(function (logo) {
       if (logo) {
         var bytes = Uint8Array.from(atob(logo.data.split(',')[1]), function (c) { return c.charCodeAt(0); });
@@ -402,7 +404,7 @@
     var label = btn.querySelector('.pack-dl-label') || btn;
     var original = label.textContent;
     label.textContent = 'Building…';
-    loadScript(LIBS[kind])
+    loadScript(base() + LIBS[kind])
       .then(function () { return BUILDERS[kind](d, profile()); })
       .then(function () { label.textContent = original; })
       .catch(function (err) {
